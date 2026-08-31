@@ -4,7 +4,8 @@ __pycache__/
 .data/
 tests/
 docs/
-scripts/
+scripts/*
+!scripts/seed_featured_scripts.py
 ai_agent.log
 *.pyc
 .github/

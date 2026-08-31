@@ -62,10 +62,10 @@ class ConfigManager:
         """获取LLM配置"""
         if self._llm_config is None:
             self._llm_config = LLMConfig(
-                provider=os.getenv("LLM_PROVIDER", "openai"),
-                api_key=os.getenv("OPENAI_API_KEY", ""),
-                base_url=os.getenv("OPENAI_BASE_URL"),
-                model=os.getenv("OPENAI_MODEL", "gpt-3.5-turbo"),
+                provider=os.getenv("LLM_PROVIDER", "deepseek"),
+                api_key=os.getenv("DEEPSEEK_API_KEY", os.getenv("OPENAI_API_KEY", "")),
+                base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
+                model=os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
                 max_tokens=int(os.getenv("LLM_MAX_TOKENS", "1000")),
                 temperature=float(os.getenv("LLM_TEMPERATURE", "0.7"))
             )
@@ -134,7 +134,7 @@ class ConfigManager:
     @property
     def allow_anonymous_access(self) -> bool:
         """是否允许匿名访问（使用默认访客账户）"""
-        return os.getenv("ALLOW_ANONYMOUS_ACCESS", "true").lower() == "true"
+        return os.getenv("ALLOW_ANONYMOUS_ACCESS", "false").lower() == "true"
     
     @property
     def guest_username(self) -> str:

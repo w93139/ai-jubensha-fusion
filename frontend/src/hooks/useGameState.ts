@@ -44,7 +44,7 @@ export const useGameState = (scriptId?: number) => {
   const [gameLog, setGameLog] = useState<GameLogEntry[]>([
     {
       character: '系统',
-      content: '欢迎来到AI剧本杀游戏！选择剧本开始体验。',
+      content: '欢迎来到人生海海！选择剧本开始体验。',
       timestamp: new Date()
     }
   ]);

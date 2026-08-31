@@ -10,6 +10,7 @@ from .game_session import GameSession
 from .game_event import GameEventDBModel
 from .user_game_participant import UserGameParticipant
 from .image import ImageDBModel, ImageType
+from .fusion_game import ParticipantEvidence, FusionVote
 __all__ = [
     "ScriptDBModel",
     "CharacterDBModel",
@@ -23,5 +24,7 @@ __all__ = [
     "UserGameParticipant",
     "ImageDBModel",
     "ScriptStatus",
-    "ImageType"
+    "ImageType",
+    "ParticipantEvidence",
+    "FusionVote",
 ]

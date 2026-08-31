@@ -2,6 +2,42 @@
 from pydantic import BaseModel, EmailStr, Field, validator
 from typing import Optional, List
 from datetime import datetime
+import re
+
+PHONE_PATTERN = re.compile(r'^1[3-9]\d{9}$')
+
+class SmsCodeRequest(BaseModel):
+    phone: str = Field(..., description="中国大陆手机号")
+
+    @validator('phone')
+    def validate_phone(cls, value):
+        if not PHONE_PATTERN.fullmatch(value.strip()):
+            raise ValueError('请输入有效的中国大陆手机号')
+        return value.strip()
+
+class SmsCodeResponse(BaseModel):
+    message: str
+    expires_in: int = 300
+    retry_after: int = 60
+    dev_code: Optional[str] = None
+
+class PhoneLogin(BaseModel):
+    phone: str = Field(..., description="中国大陆手机号")
+    code: str = Field(..., min_length=6, max_length=6, description="短信验证码")
+    invite_code: Optional[str] = Field(None, max_length=64, description="首次登录邀请码")
+    nickname: Optional[str] = Field(None, min_length=1, max_length=50, description="首次登录昵称")
+
+    @validator('phone')
+    def validate_phone(cls, value):
+        if not PHONE_PATTERN.fullmatch(value.strip()):
+            raise ValueError('请输入有效的中国大陆手机号')
+        return value.strip()
+
+    @validator('code')
+    def validate_code(cls, value):
+        if not value.isdigit():
+            raise ValueError('验证码必须为 6 位数字')
+        return value
 
 # 用户注册
 class UserRegister(BaseModel):
@@ -54,6 +90,7 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: str
+    phone: Optional[str] = None
     nickname: Optional[str]
     avatar_url: Optional[str]
     bio: Optional[str]

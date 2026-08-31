@@ -9,6 +9,12 @@ config({ path: path.resolve(__dirname, "../.env") });
 const DEFAULT_BACKEND_PORT = 8010;
 
 const normalizeApiBaseUrl = (value: string) => {
+  // Keep the same-origin marker until client configuration is compiled.
+  // Turning "/" into an empty string here makes the client treat it as an
+  // unset value and incorrectly fall back to http://localhost:8010.
+  if (value === '/') {
+    return '/';
+  }
   // Accept both origin and legacy ".../api" forms; store as origin.
   // Examples: "http://localhost:8010" or "http://localhost:8010/api"
   return value.replace(/\/+$/, '').replace(/\/api$/, '');
@@ -31,11 +37,6 @@ const nextConfig: NextConfig = {
   // 产出自包含的 standalone 目录，用于精简 Docker 镜像
   output: 'standalone',
 
-  // ESLint配置 - 在构建时忽略警告（仅在必要时使用）
-  eslint: {
-    ignoreDuringBuilds: true, // 允许警告存在时继续构建
-  },
-  
   // 环境变量配置
   env: {
     NEXT_PUBLIC_API_URL: buildApiBaseUrl(),

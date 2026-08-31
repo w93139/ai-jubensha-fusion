@@ -107,7 +107,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             {/* Logo */}
             {!isGamePage && (
               <Link href="/" className="font-dossier text-lg font-bold text-brass hover:text-paper transition-colors">
-                AI 剧本杀
+                人生海海
               </Link>
             )}
             
@@ -158,7 +158,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         )}>
             <div className="flex h-16 shrink-0 items-center px-6 border-b border-hairline">
               <Link href="/" className="font-dossier text-lg font-bold text-brass hover:text-paper transition-colors">
-                AI 剧本杀
+                人生海海
               </Link>
             </div>
             <div className="flex flex-col h-full">

@@ -1,5 +1,7 @@
 """用户认证服务"""
 import os
+import hmac
+import secrets
 from datetime import datetime, timedelta
 from typing import Optional, Union
 from passlib.context import CryptContext  # type: ignore  
@@ -98,8 +100,10 @@ class AuthService:
         
         if not user:
             return None
-        user_dict = user.to_dict()
-        if not AuthService.verify_password(password, user_dict['hashed_password']):
+        # User.to_dict() intentionally excludes password hashes by default.
+        # Authentication runs server-side and should read the mapped attribute
+        # directly instead of weakening the model's safe serialization default.
+        if not AuthService.verify_password(password, str(user.hashed_password)):
             return None
         
         return user
@@ -113,6 +117,96 @@ class AuthService:
     def get_user_by_email(db: Session, email: str) -> Optional[User]:
         """根据邮箱获取用户"""
         return db.query(User).filter(User.email == email).first()
+
+    @staticmethod
+    def get_user_by_phone(db: Session, phone: str) -> Optional[User]:
+        return db.query(User).filter(User.phone == phone).first()
+
+    @staticmethod
+    def send_sms_code(phone: str) -> dict:
+        """Store a short-lived OTP in Redis. Mock mode returns the code to the local UI."""
+        from redis import Redis
+        from redis.exceptions import RedisError
+
+        redis_client = Redis.from_url(
+            os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+            decode_responses=True,
+        )
+        rate_key = f"auth:sms:rate:{phone}"
+        code_key = f"auth:sms:code:{phone}"
+        try:
+            if redis_client.exists(rate_key):
+                ttl = max(redis_client.ttl(rate_key), 1)
+                raise HTTPException(status_code=429, detail=f"请 {ttl} 秒后再获取验证码")
+
+            provider = os.getenv("SMS_PROVIDER", "mock").lower()
+            if provider != "mock":
+                raise HTTPException(status_code=503, detail="真实短信服务尚未配置")
+
+            code = os.getenv("SMS_MOCK_CODE", "123456") or f"{secrets.randbelow(1000000):06d}"
+            redis_client.setex(code_key, 300, code)
+            redis_client.setex(rate_key, 60, "1")
+            return {
+                "message": "验证码已发送",
+                "expires_in": 300,
+                "retry_after": 60,
+                "dev_code": code,
+            }
+        except HTTPException:
+            raise
+        except RedisError as exc:
+            raise HTTPException(status_code=503, detail="验证码服务暂不可用") from exc
+
+    @staticmethod
+    def verify_sms_code(phone: str, code: str) -> None:
+        from redis import Redis
+
+        redis_client = Redis.from_url(
+            os.getenv("REDIS_URL", "redis://localhost:6379/0"),
+            decode_responses=True,
+        )
+        key = f"auth:sms:code:{phone}"
+        expected = redis_client.get(key)
+        if not expected or not hmac.compare_digest(expected, code):
+            raise HTTPException(status_code=400, detail="验证码错误或已过期")
+        redis_client.delete(key)
+
+    @staticmethod
+    def authenticate_or_create_phone_user(
+        db: Session,
+        phone: str,
+        code: str,
+        invite_code: Optional[str] = None,
+        nickname: Optional[str] = None,
+    ) -> User:
+        user = AuthService.get_user_by_phone(db, phone)
+        if user:
+            AuthService.verify_sms_code(phone, code)
+            return user
+
+        allowed_codes = {
+            item.strip() for item in os.getenv("INVITE_CODES", "").split(",") if item.strip()
+        }
+        if not invite_code or invite_code.strip() not in allowed_codes:
+            raise HTTPException(status_code=403, detail="邀请码无效")
+        if not nickname or not nickname.strip():
+            raise HTTPException(status_code=400, detail="首次登录请设置昵称")
+
+        AuthService.verify_sms_code(phone, code)
+
+        generated_password = secrets.token_urlsafe(32)
+        user = User(
+            username=f"u_{phone}",
+            email=f"{phone}@phone.local",
+            phone=phone,
+            hashed_password=AuthService.get_password_hash(generated_password),
+            nickname=nickname.strip(),
+            is_verified=True,
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
     
     @staticmethod
     def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
@@ -183,7 +277,7 @@ class AuthService:
             )
         
         # 验证旧密码
-        if not AuthService.verify_password(old_password, user.to_dict()['hashed_password']):
+        if not AuthService.verify_password(old_password, str(user.hashed_password)):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="旧密码错误"

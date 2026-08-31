@@ -26,7 +26,7 @@ const HeroSection = () => {
         </div>
 
         <h1 className="font-dossier text-6xl md:text-8xl font-bold mb-6 text-paper">
-          AI 剧本杀
+          人生海海
         </h1>
 
         <div className="mx-auto mb-8 h-px w-24 bg-brass/40" />
@@ -38,10 +38,10 @@ const HeroSection = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-          <Link href="/script-center">
+          <Link href="/play">
             <Button size="lg" className="border border-brass/40 bg-brass/10 text-brass hover:bg-brass/20 px-8 text-lg font-semibold">
               <Library className="w-5 h-5 mr-2" />
-              立即开始游戏
+              开始单人案件
             </Button>
           </Link>
         </div>
@@ -144,7 +144,7 @@ export default function HomePage() {
         <footer className="py-12 px-4 bg-ink border-t border-line">
           <div className="max-w-6xl mx-auto text-center">
             <div className="mb-6">
-              <h3 className="font-dossier text-2xl font-bold text-paper mb-2">AI 剧本杀</h3>
+              <h3 className="font-dossier text-2xl font-bold text-paper mb-2">人生海海</h3>
               <p className="text-mist">下一代沉浸式推理游戏平台</p>
             </div>
             <div className="flex justify-center space-x-6 mb-6">
@@ -162,7 +162,7 @@ export default function HomePage() {
               </Link>
             </div>
             <p className="text-faint text-sm">
-              &copy; {new Date().getFullYear()} AI JUBENSHA. All rights reserved.
+              &copy; {new Date().getFullYear()} 人生海海. All rights reserved.
             </p>
           </div>
         </footer>

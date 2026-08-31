@@ -39,6 +39,20 @@ export interface UserLogin {
   password: string;
 }
 
+export interface PhoneLogin {
+  phone: string;
+  code: string;
+  invite_code?: string;
+  nickname?: string;
+}
+
+export interface SmsCodeResponse {
+  message: string;
+  expires_in: number;
+  retry_after: number;
+  dev_code?: string;
+}
+
 export interface UserUpdate {
   nickname?: string;
   email?: string;

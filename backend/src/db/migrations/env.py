@@ -27,7 +27,7 @@ def get_database_url():
     db_name = os.getenv("DB_NAME", "jubensha_db")
     db_user = os.getenv("DB_USER", "postgres")
     db_password = os.getenv("DB_PASSWORD", "")
-    return f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    return f"postgresql+psycopg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 # 设置数据库URL
 config.set_main_option("sqlalchemy.url", get_database_url())

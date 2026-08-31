@@ -1,5 +1,6 @@
 """用户认证API路由"""
 from datetime import timedelta
+import os
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from src.services.auth_service import AuthService, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -9,13 +10,39 @@ from src.core.auth_middleware import (
 )
 from src.schemas.user_schemas import (
     UserRegister, UserLogin, UserResponse, UserUpdate, PasswordChange,
-    Token, UserBrief
+    Token, UserBrief, SmsCodeRequest, SmsCodeResponse, PhoneLogin
 )
 from src.db.models.user import User
 from src.core.container_integration import get_db_session_depends
 from src.core.config import config
 
 router = APIRouter(prefix="/api/auth", tags=["用户认证"])
+
+def _token_for_user(db: Session, user: User) -> Token:
+    if user.is_active is False:
+        raise HTTPException(status_code=401, detail="用户账户已被禁用")
+    access_token = AuthService.create_access_token(
+        data={"sub": user.username, "user_id": getattr(user, "id")},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    AuthService.update_last_login(db, getattr(user, "id"))
+    return Token(
+        access_token=access_token,
+        token_type="bearer",
+        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=UserResponse.from_orm(user),
+    )
+
+@router.post("/sms-code", response_model=SmsCodeResponse, summary="发送手机验证码")
+async def send_sms_code(data: SmsCodeRequest):
+    return SmsCodeResponse(**AuthService.send_sms_code(data.phone))
+
+@router.post("/phone-login", response_model=Token, summary="手机号验证码登录或首次注册")
+async def phone_login(data: PhoneLogin, db: Session = get_db_session_depends()):
+    user = AuthService.authenticate_or_create_phone_user(
+        db, data.phone, data.code, data.invite_code, data.nickname
+    )
+    return _token_for_user(db, user)
 
 @router.post("/anonymous-login", response_model=Token, summary="匿名登录")
 async def anonymous_login(
@@ -53,6 +80,11 @@ async def register(
     db: Session = get_db_session_depends()
 ):
     """用户注册"""
+    if os.getenv("ALLOW_LEGACY_REGISTRATION", "false").lower() != "true":
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="用户名密码注册已关闭，请使用手机号验证码登录",
+        )
     try:
         # 创建用户
         user = AuthService.create_user(

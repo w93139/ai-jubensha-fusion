@@ -55,13 +55,13 @@ const DockBar: React.FC<DockBarProps> = ({ className }) => {
       <div className="flex h-20 items-center border-b border-line px-4 shrink-0">
         <Link href="/" className="flex items-center gap-3">
           <div className="w-12 h-12 shrink-0 bg-brass/15 border border-brass/40 rounded-sm flex items-center justify-center hover:bg-brass/25 transition-all duration-200">
-            <span className="font-dossier text-paper font-bold text-lg">AI</span>
+            <span className="font-dossier text-paper font-bold text-lg">海</span>
           </div>
           <span className={cn(
             "font-dossier text-paper font-bold text-base whitespace-nowrap transition-opacity duration-300",
             expanded ? "opacity-100" : "opacity-0"
           )}>
-            AI 剧本杀
+            人生海海
           </span>
         </Link>
       </div>

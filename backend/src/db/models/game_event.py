@@ -18,6 +18,12 @@ class GameEventDBModel(BaseSQLAlchemyModel):
     
     session_id = Column(String(100), ForeignKey("game_sessions.session_id"), nullable=False, index=True)
     event_type = Column(String(50), nullable=False, index=True)  # action, chat, system, phase_change, tts
+    event_version = Column(Integer, nullable=False, default=1)
+    event_sequence = Column(Integer, nullable=False, default=0)
+    visibility = Column(String(24), nullable=False, default="PUBLIC")
+    recipient_character_id = Column(Integer, ForeignKey("characters.id"), nullable=True)
+    actor_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    idempotency_key = Column(String(100), nullable=True)
     character_name = Column(String(100), nullable=True, index=True)
     content = Column(Text, nullable=False)
     
@@ -37,6 +43,8 @@ class GameEventDBModel(BaseSQLAlchemyModel):
 
     __table_args__ = (
         Index('idx_game_events_session_timestamp', 'session_id', 'timestamp'),
+        Index('idx_game_events_session_sequence', 'session_id', 'event_sequence', unique=True),
+        Index('idx_game_events_session_idempotency', 'session_id', 'idempotency_key', unique=True),
     )
     
     def __repr__(self):

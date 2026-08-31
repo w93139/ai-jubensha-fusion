@@ -9,6 +9,7 @@ from ..base import BaseSQLAlchemyModel
 class ScriptStatus(Enum):
     """剧本状态"""
     DRAFT = "DRAFT"  # 草稿
+    REVIEW = "REVIEW"  # 待人工审核
     PUBLISHED = "PUBLISHED"  # 已发布
     ARCHIVED = "ARCHIVED"  # 已归档
 

@@ -1,7 +1,7 @@
 // 用户认证状态管理
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { UserLogin, UserRegister } from '@/types/auth';
+import { PhoneLogin, UserLogin, UserRegister } from '@/types/auth';
 import { UserResponse as User, UserUpdate, PasswordChange } from '@/client';
 import { authService } from '@/services/authService';
 
@@ -14,6 +14,7 @@ interface AuthState {
 
   // 操作
   login: (credentials: UserLogin) => Promise<void>;
+  phoneLogin: (credentials: PhoneLogin) => Promise<void>;
   anonymousLogin: () => Promise<void>;
   register: (userData: UserRegister) => Promise<void>;
   logout: () => Promise<void>;
@@ -49,6 +50,23 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null,
           });
+        } catch (error) {
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: error instanceof Error ? error.message : '登录失败',
+          });
+          throw error;
+        }
+      },
+
+      phoneLogin: async (credentials: PhoneLogin) => {
+        try {
+          set({ isLoading: true, error: null });
+          const response = await authService.phoneLogin(credentials);
+          authService.setToken(response.access_token);
+          set({ user: response.user, isAuthenticated: true, isLoading: false, error: null });
         } catch (error) {
           set({
             user: null,

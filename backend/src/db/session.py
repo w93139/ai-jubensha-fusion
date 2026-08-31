@@ -20,20 +20,23 @@ class DatabaseManager:
         Args:
             database_url: 数据库连接URL，如果为None则从配置获取
         """
+        config = get_database_config()
         if database_url is None:
-            config = get_database_config()
-            database_url = f"postgresql://{config.username}:{config.password}@{config.host}:{config.port}/{config.database}"
+            database_url = f"postgresql+psycopg://{config.username}:{config.password}@{config.host}:{config.port}/{config.database}"
         
         # 创建引擎
-        self._engine = create_engine(
-            database_url,
-            echo=False,  # 生产环境关闭SQL日志
-            pool_pre_ping=True,  # 连接池预检查
-            pool_recycle=3600,   # 连接回收时间
-            pool_size=config.pool_size,  # 连接池大小
-            max_overflow=20,  # 最大溢出连接数
-            pool_timeout=60,  # 连接池超时时间（秒）
-        )
+        engine_options = {
+            "echo": False,
+            "pool_pre_ping": True,
+        }
+        if not database_url.startswith("sqlite"):
+            engine_options.update({
+                "pool_recycle": 3600,
+                "pool_size": config.pool_size,
+                "max_overflow": 20,
+                "pool_timeout": 60,
+            })
+        self._engine = create_engine(database_url, **engine_options)
         
         # 创建会话工厂
         self._session_factory = sessionmaker(

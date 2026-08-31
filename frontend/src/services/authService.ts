@@ -8,7 +8,7 @@ import {
   UserRegister,
   UserUpdate
 } from '@/client';
-import { GameHistory } from '@/types/auth';
+import { GameHistory, PhoneLogin, SmsCodeResponse } from '@/types/auth';
 import { config } from '@/stores/configStore';
 
 class AuthService {
@@ -107,6 +107,20 @@ class AuthService {
       console.error('登录失败:', error);
       throw error;
     }
+  }
+
+  async sendSmsCode(phone: string): Promise<SmsCodeResponse> {
+    return this.request<SmsCodeResponse>('/api/auth/sms-code', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
+    });
+  }
+
+  async phoneLogin(data: PhoneLogin): Promise<Token> {
+    return this.request<Token>('/api/auth/phone-login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   /**

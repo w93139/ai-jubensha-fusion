@@ -1,0 +1,12 @@
+{$SITE_ADDRESS::80} {
+    encode zstd gzip
+    @backend path /api/* /health /docs* /redoc* /openapi.json /static/*
+    reverse_proxy @backend backend:8010
+    reverse_proxy frontend:8009
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+}
+

@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 import "@/styles/custom-scrollbar.css";
 import React from 'react';
 import type { AppProps } from "next/app";
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Toaster } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -125,6 +126,10 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ErrorBoundary>
+      <Head>
+        <title>人生海海</title>
+        <meta name="application-name" content="人生海海" />
+      </Head>
       <PageLoader visible={routeLoading} />
       <Component {...pageProps} />
       <Toaster

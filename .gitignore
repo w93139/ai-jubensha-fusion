@@ -28,6 +28,11 @@ frontend/.env.production.local
 backend/.data
 .figma/*
 
+# Private/copyrighted source material must never be committed.
+/private-data/
+/script-library/
+/source-materials/
+
 # 添加的忽略规则
 # 系统文件
 .DS_Store

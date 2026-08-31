@@ -22,6 +22,16 @@ class GameSession(BaseSQLAlchemyModel):
     script_id = Column(Integer, ForeignKey('scripts.id'), nullable=False, comment="剧本ID")
     host_user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment="房主用户ID")
     status = mapped_column(SqlEnum(GameSessionStatus), nullable=False, comment="游戏会话状态")
+    mode = Column(String(32), nullable=False, default="SOLO_WITH_AI", comment="游戏模式")
+    current_phase = Column(String(40), nullable=False, default="CHARACTER_SELECTION")
+    current_round = Column(Integer, nullable=False, default=0)
+    state_version = Column(Integer, nullable=False, default=1)
+    state_data = Column(JSON, nullable=False, default=dict)
+    last_event_id = Column(Integer, nullable=False, default=0)
+    prompt_tokens = Column(Integer, nullable=False, default=0)
+    completion_tokens = Column(Integer, nullable=False, default=0)
+    estimated_cost = Column(Float, nullable=False, default=0.0)
+    is_read_only = Column(Boolean, nullable=False, default=False)
     # 时间记录
     started_at = Column(DateTime(timezone=True), nullable=True, comment="游戏开始时间")
     finished_at = Column(DateTime(timezone=True), nullable=True, comment="游戏结束时间")
@@ -50,6 +60,11 @@ class GameSession(BaseSQLAlchemyModel):
             'script_id': self.script_id,
             'host_user_id': self.host_user_id,
             'status': self.status,
+            'mode': self.mode,
+            'current_phase': self.current_phase,
+            'current_round': self.current_round,
+            'state_version': self.state_version,
+            'last_event_id': self.last_event_id,
             'created_at': self.created_at.isoformat() if self.created_at is not None else None,  # 保留时区信息
             'updated_at': self.updated_at.isoformat() if self.updated_at is not None else None,  # 保留时区信息
             'started_at': self.started_at.isoformat() if self.started_at is not None else None,  # 保留时区信息

@@ -46,7 +46,7 @@ const TopBar: React.FC<TopBarProps> = ({
           {/* Logo - 游戏页面隐藏 */}
           {!isGamePage && (
             <Link href="/" className="font-dossier text-lg font-bold text-brass hover:text-paper transition-colors">
-              AI 剧本杀
+              人生海海
             </Link>
           )}
           

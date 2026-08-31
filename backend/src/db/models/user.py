@@ -11,6 +11,7 @@ class User(BaseSQLAlchemyModel):
     # 基本信息
     username = Column(String(50), unique=True, nullable=False, index=True, comment="用户名")
     email = Column(String(100), unique=True, nullable=False, index=True, comment="邮箱")
+    phone = Column(String(20), unique=True, nullable=True, index=True, comment="手机号")
     hashed_password = Column(String(255), nullable=False, comment="加密密码")
     
     # 个人资料
@@ -43,6 +44,7 @@ class User(BaseSQLAlchemyModel):
             'id': self.id,
             'username': self.username,
             'email': self.email,
+            'phone': self.phone,
             'nickname': self.nickname,
             'avatar_url': self.avatar_url,
             'bio': self.bio,
@@ -52,11 +54,9 @@ class User(BaseSQLAlchemyModel):
             'last_login_at': self.last_login_at.isoformat() if self.last_login_at is not None else None,  # 修复：明确检查None
             'created_at': self.created_at.isoformat() if self.created_at is not None else None,  # 修复：明确检查None
             'updated_at': self.updated_at.isoformat() if self.updated_at is not None else None,  # 修复：明确检查None
-            'hashed_password': self.hashed_password,
         }
         
         if include_sensitive:
             data['hashed_password'] = self.hashed_password
             
         return data
-

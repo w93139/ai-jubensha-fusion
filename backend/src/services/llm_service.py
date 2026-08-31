@@ -342,7 +342,7 @@ class LLMService:
             raise ValueError("LLM provider cannot be None or empty")
         
         provider_lower = provider.lower()
-        if provider_lower == "openai":
+        if provider_lower in ("openai", "deepseek"):
             return OpenAILLMService(**config)
         elif provider_lower == "langchain":
             return LangChainLLMService(**config)

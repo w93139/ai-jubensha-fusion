@@ -8,7 +8,7 @@ const DEFAULT_CONFIG = {
     retries: 1,
   },
   app: {
-    name: 'AI剧本杀游戏',
+    name: '人生海海',
     version: '1.0.0',
   },
 } as const;

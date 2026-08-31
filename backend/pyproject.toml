@@ -3,7 +3,7 @@ name = "jubensha"
 version = "0.1.0"
 description = "AI剧本杀游戏demo"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "langchain>=0.1.0",
     "langchain-openai>=0.1.0",
@@ -23,7 +23,8 @@ dependencies = [
     "python-multipart>=0.0.6",
     "aiohttp>=3.12.13",
     "alembic>=1.16.4",
-    "psycopg2-binary>=2.9.10",
+    "psycopg[binary]>=3.2.3",
+    "redis>=5.2.0",
     "passlib[bcrypt]>=1.7.4",
     "python-jose[cryptography]>=3.5.0",
     "email-validator>=2.2.0",
@@ -36,4 +37,3 @@ dev = [
     "pyright>=1.1.300",
     "pytest>=8.4.1",
 ]
-
