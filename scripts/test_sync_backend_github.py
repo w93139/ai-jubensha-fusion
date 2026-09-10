@@ -367,9 +367,32 @@ class SnapshotTests(unittest.TestCase):
                 backup.push_snapshot(self.destination, self.version)
 
     def test_version_validation_and_push_requires_explicit_sync(self):
-        for version in ["m3-20260230.1", "../escape", "m3-20260908.01", "main", "m3-20260908.1;command"]:
+        for version in ["m3-20260230.1", "m4-20260230.1", "../escape", "m3-20260908.01",
+                        "m4-20260910.01", "main", "m3-20260908.1;command", "m4-20260910.1;command",
+                        "m2-20260910.1", "m5-20260910.1", "m34-20260910.1", "M4-20260910.1",
+                        "m4-20260910.-1", "m4-20260910.", "m4-20260910.1\n", "m4-20260910.1２"]:
             self.assertEqual(self.invoke("--sync", version=version)[0], 1)
         self.assertEqual(self.invoke("--push")[0], 1)
+        self.assertFalse(self.destination.exists())
+
+    def test_m3_and_m4_versions_accept_valid_dates_and_nonnegative_sequence(self):
+        for milestone in ('m3', 'm4'):
+            for suffix in ('20260910.0', '20260910.1', '20260910.123', '20280229.1'):
+                with self.subTest(version=f'{milestone}-{suffix}'):
+                    backup.validate_version(f'{milestone}-{suffix}')
+            with self.assertRaisesRegex(backup.BackupError, '版本中的日期无效'):
+                backup.validate_version(f'{milestone}-20260229.1')
+        with self.assertRaisesRegex(backup.BackupError, 'm3-YYYYMMDD.N 或 m4-YYYYMMDD.N'):
+            backup.validate_version('m5-20260910.1')
+
+    def test_m4_check_only_snapshot_manifest_preserves_version_without_writing_destination(self):
+        version = 'm4-20260910.1'
+        status, output = self.invoke(version=version)
+        self.assertEqual(status, 0, output)
+        self.assertEqual(json.loads(output)['version'], version)
+        files, manifest, _ = backup.collect_snapshot(self.source, version)
+        self.assertEqual(manifest['version'], version)
+        self.assertEqual(files['VERSION'], (version + '\n').encode())
         self.assertFalse(self.destination.exists())
 
     def test_writers_lock_is_exclusive_and_stale_file_is_reusable(self):

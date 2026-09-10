@@ -145,8 +145,8 @@ def inspect_text(name: str, data: bytes) -> None:
 
 
 def validate_version(version: str) -> None:
-    if not re.fullmatch(r"m3-\d{8}\.(?:0|[1-9]\d*)", version):
-        raise BackupError("版本格式必须为 m3-YYYYMMDD.N。")
+    if not re.fullmatch(r"m[34]-[0-9]{8}\.(?:0|[1-9][0-9]*)", version):
+        raise BackupError("版本格式必须为 m3-YYYYMMDD.N 或 m4-YYYYMMDD.N，N 为无前导零的非负整数。")
     try:
         datetime.strptime(version[3:11], "%Y%m%d")
     except ValueError as exc:

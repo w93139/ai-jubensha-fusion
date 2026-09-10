@@ -51,7 +51,9 @@ from src.fusion.package_guided_flow import GUIDED_POLICY, safe_text, digest, val
 from src.fusion.package_round_workspace import plan_round, capture_workspace, project_workspace
 from src.schemas.package_play import TopicCommand
 from src.fusion.package_single_player import SINGLE_POLICY, topic_response_request, topic_status
-from src.fusion.topic_answer_checks import BASIS_VERSION, BASIS_GUIDANCE, validate_topic_answer
+from src.fusion.package_role_content import resolve_role_content, role_content_required
+from src.fusion.topic_answer_checks import (BASIS_VERSION, BASIS_GUIDANCE, DISCLOSURE_VERSION,
+                                            DISCLOSURE_GUIDANCE, validate_topic_answer)
 
 
 BINDING_CONTRACT = "package-text-play-binding/1.0"
@@ -864,10 +866,12 @@ class PackagePlayService:
                             value['strategy_materials'][-1]['text'] += (
                                 '其中public_document_basis是已取得的文献，可明确说报纸或头条写了什么；'
                                 '阅读文献不等于你亲眼见过其中报道的事件，须保留文献归属。')
-                        if topic['answer_contract'].get('schema_version') == BASIS_VERSION:
+                        if topic['answer_contract'].get('schema_version') in (BASIS_VERSION, DISCLOSURE_VERSION):
                             # Historical context hashes depend on the exact 1.0
                             # text above; new guidance belongs only to 1.1 turns.
                             value['strategy_materials'][-1]['text'] += BASIS_GUIDANCE
+                        if topic['answer_contract'].get('schema_version') == DISCLOSURE_VERSION:
+                            value['strategy_materials'][-1]['text'] += DISCLOSURE_GUIDANCE
                 related = {t['reply_to'] for t in state.topic_turns if t['topic_id'] == topic['topic_id']
                            and t['character_id'] == character and t['channel'] == topic['channel']}
                 related |= {t['answer_id'] for t in state.topic_turns if t['topic_id'] == topic['topic_id']
@@ -1204,12 +1208,11 @@ class PackagePlayService:
         return result
 
     def _single_catalog(self, binding):
-        catalog = self.single_player_content.get(binding['package_hash'])
-        return catalog if catalog and catalog.character_id == binding['selected_character_id'] else None
+        return resolve_role_content(self.single_player_content, binding['package_hash'], binding['selected_character_id'])
 
     def _single_enabled(self, binding, state):
         return bool(self._single_catalog(binding) is not None or state.topic_commands
-                    or self.single_player_required.get(binding['package_hash']) == binding['selected_character_id'])
+                    or role_content_required(self.single_player_required, binding['package_hash'], binding['selected_character_id']))
 
     def topic(self, identifier, body, owner):
         request = self._request(body, TopicCommand)
@@ -1253,8 +1256,7 @@ class PackagePlayService:
             raise PackagePlayError('PACKAGE_PLAY_WRITE_CONFLICT') from None
 
     def _guided_catalog(self, binding):
-        catalogue = self.guided_content.get(binding['package_hash'])
-        return catalogue if catalogue and catalogue.character_id == binding['selected_character_id'] else None
+        return resolve_role_content(self.guided_content, binding['package_hash'], binding['selected_character_id'])
 
     def _present_required(self, row, binding, state):
         catalogue = self._guided_catalog(binding)

@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 from src.db.models.package_runtime import ScriptPackagePlaySession
 from src.fusion.package_import import PackageImportService
 from src.fusion.package_single_player import SinglePlayerContent
+from src.fusion.package_role_content import RequiredRoles, resolve_role_content, role_content_required
 from src.fusion.package_validation import canonical_json, content_hash, validate_package
 from src.schemas.package_runtime import CreatePackageSessionRequest
 
@@ -43,8 +44,8 @@ class PublicationReader(Protocol):
 
 class PackageRuntimeService:
     def __init__(self, db: Session, publisher: PublicationReader | None = None, *, presentation_repair=None,
-                 single_player_content: dict[str, SinglePlayerContent] | None = None,
-                 single_player_required: dict[str, str] | None = None) -> None:
+                 single_player_content: dict[str, SinglePlayerContent | dict[str, SinglePlayerContent]] | None = None,
+                 single_player_required: dict[str, RequiredRoles] | None = None) -> None:
         self.db = db
         self.presentation_repair = presentation_repair
         self.single_player_content = dict(single_player_content or {})
@@ -225,11 +226,8 @@ class PackageRuntimeService:
         return package
 
     def _opening_view(self, row: ScriptPackagePlaySession, package: dict) -> dict:
-        single = self.single_player_content.get(row.package_hash)
-        if (single is not None and (single.package_hash != row.package_hash
-                                   or single.character_id != row.selected_character_id)):
-            single = None
-        if single is None and self.single_player_required.get(row.package_hash) == row.selected_character_id:
+        single = resolve_role_content(self.single_player_content, row.package_hash, row.selected_character_id)
+        if single is None and role_content_required(self.single_player_required, row.package_hash, row.selected_character_id):
             raise PackageRuntimeError("PACKAGE_OPENING_SINGLE_PLAYER_UNAVAILABLE")
         initial = next(item for item in package["phases"] if item["id"] == package["initial_phase_id"])
         result = {"session_id": row.session_id, "release_id": row.release_id, "version_id": row.version_id,

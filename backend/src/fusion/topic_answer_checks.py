@@ -13,6 +13,12 @@ from src.fusion.speech_passages import source_passages
 
 VERSION = 'topic-answer-check/1.0'
 BASIS_VERSION = 'topic-answer-check/1.1'
+DISCLOSURE_VERSION = 'topic-answer-check/1.2'
+DISCLOSURE_GUIDANCE = (
+    'forbidden_terms是本题明确禁止披露的细节线索，公开和私聊同样适用。'
+    '不要提及这些细节，也不要改用代称、否定句、反问或动作暗示来透露同一秘密。'
+    '只回答本题允许的亲历节点，未问到的私人经过不主动补充；允许明确保留私事。'
+)
 BASIS_GUIDANCE = (
     'conditional_basis列出本题已审核的表达与来源要求：某段出现when_any中的表达时，'
     '该段basis必须包括requires指定的资料和全部passage_ids，其他段的引用不能代替。'
@@ -29,10 +35,17 @@ def normalized(text):
 def validate_contract(contract, materials, intent_ids):
     require(type(contract) is dict)
     version = contract.get('schema_version')
-    require(version in (VERSION, BASIS_VERSION)
+    require(version in (VERSION, BASIS_VERSION, DISCLOSURE_VERSION)
             and set(contract) <= {'schema_version','required_terms','reported_passages','conditional_terms',
                                  'reject_public_personal_observation','reject_unsupported_certainty',
-                                 'public_document_basis'} | ({'conditional_basis'} if version == BASIS_VERSION else set()))
+                                 'public_document_basis'}
+            | ({'conditional_basis'} if version in (BASIS_VERSION, DISCLOSURE_VERSION) else set())
+            | ({'forbidden_terms'} if version == DISCLOSURE_VERSION else set()))
+    if version == DISCLOSURE_VERSION:
+        terms = contract.get('forbidden_terms', [])
+        require(type(terms) is list and len(terms) <= 32
+                and all(safe_text(term, 80) and normalized(term) for term in terms))
+        require(len({normalized(term) for term in terms}) == len(terms))
     for flag in ('reject_public_personal_observation','reject_unsupported_certainty'):
         require(type(contract.get(flag, False)) is bool)
     all_text = normalized('\n'.join(m['text'] for m in materials.values()))
@@ -58,7 +71,7 @@ def validate_contract(contract, materials, intent_ids):
         for key in ('when_any','requires_any'):
             require(type(condition[key]) is list and 1 <= len(condition[key]) <= 16
                     and all(safe_text(t,80) for t in condition[key]))
-    if version == BASIS_VERSION:
+    if version in (BASIS_VERSION, DISCLOSURE_VERSION):
         validate_conditional_basis(contract.get('conditional_basis', []), materials)
 
 
@@ -143,10 +156,13 @@ def validate_topic_answer(speech, turn):
     contract = turn.get('answer_contract') if turn else None
     if contract is None:
         return
-    if contract.get('schema_version') not in (VERSION, BASIS_VERSION):
+    if contract.get('schema_version') not in (VERSION, BASIS_VERSION, DISCLOSURE_VERSION):
         raise PlayRulesError('SINGLE_TOPIC_ANSWER_CONTRACT_INVALID')
     text = '\n'.join(s.get('text') or '' for s in speech['segments'])
     plain = normalized(text)
+    if contract['schema_version'] == DISCLOSURE_VERSION:
+        if any(normalized(term) in plain for term in contract.get('forbidden_terms', [])):
+            raise PlayRulesError('SINGLE_TOPIC_DISCLOSURE_FORBIDDEN')
     if any(not any(normalized(term) in plain for term in group) for group in contract.get('required_terms', [])):
         raise PlayRulesError('SINGLE_TOPIC_ANSWER_INCOMPLETE')
     public = {(r['collection'],r['id']) for r in contract.get('public_basis', [])}
@@ -154,7 +170,7 @@ def validate_topic_answer(speech, turn):
     reported = {(r['collection'],r['id']):set(r['passage_ids']) for r in contract.get('reported_passages', [])}
     for segment in speech['segments']:
         value = segment.get('text') or ''
-        if contract['schema_version'] == BASIS_VERSION:
+        if contract['schema_version'] in (BASIS_VERSION, DISCLOSURE_VERSION):
             validate_segment_basis(segment, contract.get('conditional_basis', []))
         if contract.get('reject_unsupported_certainty') and asserted_certainty(value):
             raise PlayRulesError('SINGLE_TOPIC_CERTAINTY_UNSUPPORTED')
