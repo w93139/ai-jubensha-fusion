@@ -11,6 +11,13 @@ from .game_event import GameEventDBModel
 from .user_game_participant import UserGameParticipant
 from .image import ImageDBModel, ImageType
 from .fusion_game import ParticipantEvidence, FusionVote
+from .script_package import ScriptPackageVersion, ScriptImportJob
+from .script_review import ScriptAuditRecord, ScriptFindingDisposition
+from .authoring_job import AuthoringJob, AuthoringAttempt
+from .script_publication import ScriptPublicationApproval, ScriptPackageRelease
+from .package_runtime import ScriptPackagePlaySession
+from .package_flow import ScriptPackageFlow, ScriptPackageFlowAction
+from .package_play import ScriptPackagePlay, ScriptPackagePlayEvent
 __all__ = [
     "ScriptDBModel",
     "CharacterDBModel",
@@ -27,4 +34,17 @@ __all__ = [
     "ImageType",
     "ParticipantEvidence",
     "FusionVote",
+    "ScriptPackageVersion",
+    "ScriptImportJob",
+    "ScriptAuditRecord",
+    "ScriptFindingDisposition",
+    "AuthoringJob",
+    "AuthoringAttempt",
+    "ScriptPublicationApproval",
+    "ScriptPackageRelease",
+    "ScriptPackagePlaySession",
+    "ScriptPackageFlow",
+    "ScriptPackageFlowAction",
+    "ScriptPackagePlay",
+    "ScriptPackagePlayEvent",
 ]

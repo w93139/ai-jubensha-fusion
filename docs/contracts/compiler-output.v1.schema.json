@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "CompileBlocker": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "SOURCE_GAP",
+            "UNSUPPORTED_MECHANIC",
+            "CONTRADICTION"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Message",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "sources"
+      ],
+      "title": "CompileBlocker",
+      "type": "object"
+    },
+    "SourceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        }
+      },
+      "required": [
+        "source_id"
+      ],
+      "title": "SourceReference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "enum": [
+        "CANDIDATE",
+        "BLOCKED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "package": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Package"
+    },
+    "blockers": {
+      "items": {
+        "$ref": "#/$defs/CompileBlocker"
+      },
+      "maxItems": 100,
+      "title": "Blockers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status",
+    "package",
+    "blockers"
+  ],
+  "title": "CompileOutput",
+  "type": "object"
+}

@@ -13,6 +13,7 @@ from src.core.auth_middleware import get_current_active_user_from_request
 from src.db.models.user import User
 from ...core.container_integration import get_script_repo_depends, get_script_editor_svc_depends, get_script_generation_svc_depends
 from ...services.script_generation_service import ScriptGenerationService
+from ...core.script_authoring_policy import LegacyPublicationDenied, reject_legacy_publication
 
 router = APIRouter(prefix="/api/scripts", tags=["scripts"])
 
@@ -127,6 +128,10 @@ async def create_complete_script(
 ) -> APIResponse[Script]:
     """创建完整剧本（包含所有关联数据）"""
     try:
+        reject_legacy_publication(script.info.model_dump())
+    except LegacyPublicationDenied as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    try:
         # 设置作者为当前用户
         script.info.author = str(current_user.username)
         created_script = repo.create_complete_script(script)
@@ -169,7 +174,8 @@ async def get_public_scripts(
         return repo.get_scripts_list(
             status = ScriptStatus.PUBLISHED,
             page=page,
-            size=size
+            size=size,
+            public_only=True,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取公开剧本列表失败: {str(e)}")
@@ -241,6 +247,10 @@ async def update_script(
     repo: ScriptRepository = get_script_repo_depends()
 ) -> APIResponse[Script]:
     """更新完整剧本"""
+    try:
+        reject_legacy_publication(script.info.model_dump())
+    except LegacyPublicationDenied as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     # 检查剧本是否存在和权限
     existing_script = repo.get_script_by_id(script_id)
     if not existing_script:
@@ -270,11 +280,13 @@ async def update_script_info(
 ) -> APIResponse[ScriptInfo]:
     """更新剧本基本信息"""
     logger = logging.getLogger(__name__)
+    try:
+        reject_legacy_publication(script_data.model_dump(exclude_unset=True))
+    except LegacyPublicationDenied as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     
     try:
-        # 记录请求数据用于调试
-        request_body = await request.body()
-        logger.info(f"更新剧本信息请求 - script_id: {script_id}, 请求体: {request_body.decode('utf-8')}")
+        logger.info("更新剧本信息请求 - script_id: %s", script_id)
         
         # 检查剧本是否存在和权限
         existing_script = repo.get_script_info_by_id(script_id)
@@ -312,6 +324,10 @@ async def update_script_status(
     repo: ScriptRepository = get_script_repo_depends()
 ) -> APIResponse[str]:
     """更新剧本状态"""
+    try:
+        reject_legacy_publication({"status": status})
+    except LegacyPublicationDenied as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     # 检查剧本是否存在和权限
     existing_script = repo.get_script_info_by_id(script_id)
     if not existing_script:

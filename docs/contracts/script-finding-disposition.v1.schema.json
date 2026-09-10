@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "expected_package_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Package Hash",
+      "type": "string"
+    },
+    "expected_audit_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Audit Hash",
+      "type": "string"
+    },
+    "expected_revision": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Expected Revision",
+      "type": "integer"
+    },
+    "finding_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Finding Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "OPEN",
+        "ACKNOWLEDGED",
+        "DISMISSED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "note": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Note",
+      "type": "string"
+    }
+  },
+  "required": [
+    "idempotency_key",
+    "expected_package_hash",
+    "expected_audit_hash",
+    "expected_revision",
+    "finding_id",
+    "status",
+    "note"
+  ],
+  "title": "FindingDispositionRequest",
+  "type": "object"
+}

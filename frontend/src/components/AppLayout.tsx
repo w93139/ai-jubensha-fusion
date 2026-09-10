@@ -4,7 +4,7 @@ import UserMenu from '@/components/UserMenu';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import {
-  Menu,
+  BookOpen, History, Plus, Menu,
   X
 } from 'lucide-react';
 import Link from 'next/link';
@@ -16,16 +16,24 @@ interface AppLayoutProps {
   showSidebar?: boolean;
   backgroundImage?: string;
   isGamePage?: boolean;
+  gameWorkspace?: boolean;
 }
 
 const PAGE_TITLES: Record<string, string> = {
   '/': '首页',
-  '/script-center': '剧本中心',
+  '/script-center': '首页',
+  '/play': '首页',
+  '/play/records': '我的记录',
+  '/play/package-preview': '开始新游戏',
+  '/account': '个人信息',
   '/game': '游戏',
   '/profile': '个人资料',
   '/profile/game-history': '游戏历史',
   '/profile/change-password': '设置',
   '/script-manager/create': '创建剧本',
+  '/admin/source-bundles': '来源材料核验',
+  '/admin/script-reviews': '剧本审核记录',
+  '/admin/authoring-jobs': '编译与模型审核',
 };
 
 const getPageTitle = (pathname: string): string => {
@@ -45,10 +53,9 @@ interface NavItem {
 }
 
 const mobileNavItems: NavItem[] = [
-  { href: '/script-center', label: '剧本中心', icon: () => <span>🏠</span> },
-  { href: '/profile', label: '个人资料', icon: () => <span>👤</span>, requireAuth: true },
-  { href: '/profile/game-history', label: '游戏历史', icon: () => <span>📊</span>, requireAuth: true },
-  { href: '/profile/change-password', label: '设置', icon: () => <span>⚙️</span>, requireAuth: true },
+  { href: '/', label: '首页', icon: BookOpen },
+  { href: '/play/package-preview', label: '开始新游戏', icon: Plus, requireAuth: true },
+  { href: '/play/records', label: '我的记录', icon: History, requireAuth: true },
 ];
 
 const AppLayout: React.FC<AppLayoutProps> = ({ 
@@ -56,11 +63,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   showSidebar = true,
   backgroundImage,
   isGamePage = false,
+  gameWorkspace = false,
 
 }) => {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dockExpanded, setDockExpanded] = useState(false);
 
 
   const filteredMobileNavItems = mobileNavItems.filter(item => 
@@ -68,7 +77,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
   );
 
   return (
-    <div className="min-h-screen bg-ink text-paper">
+    <div onKeyDown={event => { if (sidebarOpen && event.key === 'Escape') { event.preventDefault(); setSidebarOpen(false); document.querySelector<HTMLButtonElement>('[aria-label="关闭导航"]')?.focus(); } }} className="app-shell min-h-screen bg-ink text-paper" data-game-workspace={gameWorkspace || undefined} style={{ '--app-desktop-dock-width': gameWorkspace ? 'var(--play-workspace-width, 0px)' : showSidebar && !isGamePage && !gameWorkspace ? (dockExpanded ? '220px' : '80px') : '0px' } as React.CSSProperties}>
       {/* 背景层 */}
       <div className="fixed inset-0">
         {backgroundImage ? (
@@ -83,8 +92,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
       </div>
 
       {/* DockBar - 桌面端显示 */}
-      {showSidebar && !isGamePage && (
-        <DockBar className="hidden md:flex" />
+      {showSidebar && !isGamePage && !gameWorkspace && (
+        <DockBar className="hidden md:flex" onExpandedChange={setDockExpanded} />
       )}
 
       {/* 移动端顶部栏 */}
@@ -93,10 +102,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           {/* 左侧区域 */}
           <div className="flex-1 flex items-center space-x-4">
             {/* 侧边栏切换按钮 */}
-            {showSidebar && !isGamePage && (
+            {showSidebar && !isGamePage && !gameWorkspace && (
               <Button
                 variant="ghost"
                 size="sm"
+                aria-label={sidebarOpen ? "关闭导航" : "打开导航"}
+                aria-expanded={sidebarOpen}
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="text-mist hover:bg-raised/60 hover:text-paper"
               >
@@ -106,8 +117,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             
             {/* Logo */}
             {!isGamePage && (
-              <Link href="/" className="font-dossier text-lg font-bold text-brass hover:text-paper transition-colors">
-                人生海海
+              <Link href="/" className={gameWorkspace ? 'inline-flex min-h-11 items-center rounded-lg border border-brass/50 bg-raised px-3 py-2 text-sm font-medium text-brass hover:text-paper' : 'font-dossier text-lg font-bold text-brass hover:text-paper transition-colors'}>
+                {gameWorkspace ? '← 返回首页' : '人生海海'}
               </Link>
             )}
             
@@ -125,7 +136,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
           </div>
 
           {/* 居中页面标题 */}
-          {!isGamePage && (() => {
+          {!isGamePage && !gameWorkspace && (() => {
             const title = getPageTitle(router.pathname);
             return title ? (
               <span className="absolute left-1/2 -translate-x-1/2 font-data text-xs tracking-wider text-mist pointer-events-none">
@@ -141,18 +152,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({
         </div>
       </div>
 
-      {/* 移动端侧边栏 - 始终可用 */}
-      <>
+      {/* 游戏中的导航由每轮记录替代。 */}
+      {showSidebar && !isGamePage && !gameWorkspace && <>
         {/* 遮罩层 */}
         {sidebarOpen && (
           <div 
-            className="fixed inset-0 z-[55] bg-ink/60 md:hidden"
+            className="fixed inset-x-0 bottom-0 top-14 z-[55] bg-ink/60 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
         
         {/* 移动端侧边栏 */}
-        <div className={cn(
+        <div inert={!sidebarOpen} aria-label="手机导航" className={cn(
           "fixed top-14 left-0 z-[60] h-[calc(100vh-3.5rem)] w-64 bg-panel backdrop-blur-sm border-r border-line transform transition-transform duration-300 md:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
@@ -192,13 +203,13 @@ const AppLayout: React.FC<AppLayoutProps> = ({
               </div>
             </div>
         </div>
-      </>
+      </>}
 
       {/* 主要内容区域 */}
       <div className={cn(
-        "relative z-10 transition-all duration-300",
+        "app-content relative z-10 transition-[padding-left] duration-300",
         "pt-14 md:pt-0", // 移动端为顶部栏留出空间，桌面端不需要
-        showSidebar && !isGamePage ? "md:pl-20" : "" // 为DockBar留出空间
+        // Content and fixed game controls use the same live Dock width.
       )}>
 
 

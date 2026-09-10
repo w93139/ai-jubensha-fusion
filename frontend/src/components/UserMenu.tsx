@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-import { User, LogOut, Settings, ChevronDown, ArrowRight, UserCheck } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, ArrowRight, UserCheck, FileSearch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -81,6 +81,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ collapsed = false, variant = 'defau
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          aria-label="账号菜单"
           className={cn(
             "text-mist hover:bg-raised/60 hover:text-paper",
             collapsed ? "p-2" : "flex items-center space-x-2 px-3 py-2 rounded-sm",
@@ -136,12 +137,32 @@ const UserMenu: React.FC<UserMenuProps> = ({ collapsed = false, variant = 'defau
         
         <DropdownMenuItem 
           className="text-paper hover:bg-raised cursor-pointer"
-          onClick={() => router.push('/profile')}
+          onClick={() => router.push('/account')}
         >
           <Settings className="h-4 w-4 mr-2" />
-          个人资料
+          个人信息
         </DropdownMenuItem>
-        
+        {user.is_admin && <DropdownMenuItem
+          className="text-paper hover:bg-raised cursor-pointer"
+          onClick={() => router.push('/admin/source-bundles')}
+        >
+          <FileSearch className="h-4 w-4 mr-2" />
+          来源材料核验
+        </DropdownMenuItem>}
+        {user.is_admin && <DropdownMenuItem
+          className="text-paper hover:bg-raised cursor-pointer"
+          onClick={() => router.push('/admin/script-reviews')}
+        >
+          <FileSearch className="h-4 w-4 mr-2" />
+          剧本审核记录
+        </DropdownMenuItem>}
+        {user.is_admin && <DropdownMenuItem
+          className="text-paper hover:bg-raised cursor-pointer"
+          onClick={() => router.push('/admin/authoring-jobs')}
+        >
+          <FileSearch className="h-4 w-4 mr-2" />
+          编译与模型审核
+        </DropdownMenuItem>}
         
         <DropdownMenuSeparator />
         

@@ -28,14 +28,17 @@ def make_tool_call(name: str, arguments: str) -> Mock:
     return tc
 
 
-def make_openai_response(content=None, tool_calls=None) -> Mock:
+def make_openai_response(content=None, tool_calls=None, usage=None, finish_reason="stop") -> Mock:
     message = Mock()
     message.content = content
     message.tool_calls = tool_calls
     response = Mock()
-    response.choices = [Mock(message=message)]
-    response.usage = None
+    choice = Mock(message=message)
+    choice.finish_reason = finish_reason
+    response.choices = [choice]
+    response.usage = usage
     response.model = "test-model"
+    response.id = "fixture-request-id"
     return response
 
 
@@ -87,6 +90,18 @@ class TestOpenAIToolCalls:
         result = chat(service)
         assert result.content == "普通回复"
         assert result.tool_calls is None
+
+    def test_usage_omits_none_fields_and_finish_reason_is_preserved(self):
+        usage = Mock()
+        usage.model_dump.return_value = {"prompt_tokens": 2, "completion_tokens": 1}
+        service = make_service(make_openai_response(content="回答", usage=usage))
+
+        result = chat(service)
+
+        usage.model_dump.assert_called_once_with(exclude_none=True)
+        assert result.usage == {"prompt_tokens": 2, "completion_tokens": 1}
+        assert result.finish_reason == "stop"
+        assert result.request_id == "fixture-request-id"
 
     def test_bad_arguments_json_tolerated(self):
         """单个调用 arguments 损坏时降级 {"_raw": ...}，其余调用正常解析"""

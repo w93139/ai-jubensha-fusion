@@ -1,0 +1,24 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "opening_session_id": {
+      "maxLength": 40,
+      "minLength": 40,
+      "pattern": "^package-[0-9a-f]{32}$",
+      "title": "Opening Session Id",
+      "type": "string"
+    },
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    }
+  },
+  "required": [
+    "opening_session_id",
+    "idempotency_key"
+  ],
+  "title": "CreatePackageFlowRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

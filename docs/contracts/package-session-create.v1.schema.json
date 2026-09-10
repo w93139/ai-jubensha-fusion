@@ -1,0 +1,28 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "release_id": {
+      "maximum": 2147483647,
+      "minimum": 1,
+      "title": "Release Id",
+      "type": "integer"
+    },
+    "character_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Character Id",
+      "type": "string"
+    },
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    }
+  },
+  "required": [
+    "release_id",
+    "character_id",
+    "idempotency_key"
+  ],
+  "title": "CreatePackageSessionRequest",
+  "type": "object"
+}

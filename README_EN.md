@@ -1,5 +1,24 @@
 # 🎭 AI Murder Mystery Game (JubenSha)
 
+> 2026-09-08: M3 is ready for local user validation with the fixed human role T and four AI roles. A real complete game reached all five sealed submissions and settlement, with 15 verified recovery points; the local entry is http://127.0.0.1:18032. Known retelling, certainty, citation and repetitive-phone issues remain. User acceptance, M4, voice and formal publication are pending. See the [current M3 record](docs/development/M3_CONTINUOUS_VALIDATION.md); older status statements below are historical.
+
+> Current single-human Fusion development: see [development handoff](docs/development/README.md).
+> Historical feature descriptions below are not proof of current runtime readiness. Never overwrite an existing .env.
+
+> Admin authoring tasks are available at `/admin/authoring-jobs`. On 2026-09-06, real Compiler v4 and Audit v3 calls completed the source verification and candidate workflow for a synthetic case with two characters and two phases. The audit covered all five categories, with two findings and no blockers. Earlier failures remain recorded. This result applies only to that small case; it does not establish commercial-script or full-product readiness, or grant publication approval. See the [3C real validation record](docs/development/PHASE_3_RULE_CONTRACT_REVIEW.md).
+>
+> [Phase 3D](docs/development/PHASE_3_PUBLICATION_BINDING.md) now adds human confirmation bound to all review evidence, explicit handling of model findings, and a separate publication action at `/admin/script-reviews`. Immutable releases support a fixed-role opening preview at `/play/package-preview`. Legacy direct PUBLISHED paths are blocked. Later review changes prevent new openings for that release and require a new content version; existing opening sessions retain their original version. This remains an opening preview with `runtime_ready=false`; full rules, AI interaction and complete play are not connected. This phase made no paid model calls, processed no commercial text and approved no real candidate. The new migration has not been applied to real PostgreSQL.
+>
+> Phase 3D validation: 1085 backend tests and 89 frontend tests passed, along with full TypeScript checks, lint for changed files and a 24-page production build. An isolated synthetic browser fixture passed human confirmation, separate publication, a regular player's fixed-role opening, reload persistence and access checks. Both admin and player pages fit 390px without horizontal overflow. No new model attempts occurred.
+>
+> Earlier [Phase 4A](docs/development/PHASE_4_RULES_PREVIEW.md) adds a deterministic fixed-role stage rehearsal at `/play/package-flow`. Users explicitly create it from an opening after a fresh release check; the opening remains read-only. Stages advance manually, with material access controlled by the phase floor and all required public evidence. Players may explicitly share their own unlocked MAY_SHARE/MUST_SHARE material; KEEP_PRIVATE remains protected. An invalidated release freezes new actions while existing authorized views and original action replays remain readable. This is still `runtime_ready=false`, without AI interaction, facilitator deadlines, settlement or full gameplay. Backend 1195 and frontend 114 tests, full TypeScript, changed-file lint and the final 25-page production build passed. An isolated synthetic browser fixture passed explicit creation, sharing and dependent unlocks, stage advancement, reload and re-entry, access checks and a 390px layout without horizontal overflow. No new model calls occurred. The new migration remains unapplied to real PostgreSQL.
+
+> Current [Phase 4B](docs/development/PHASE_4_TEXT_PLAY.md) is connected in code at `/play/package-play`. Users explicitly create an independent text-play session from their opening after a fresh release check; existing openings and stage rehearsals are unchanged. AI characters share one public record and session budget, while each receives only its own authorized context. The model selects material references; the server validates them, formally shares selected MAY_SHARE/MUST_SHARE material and renders the original text. KEEP_PRIVATE remains excluded. Players advance manually and explicitly settle at the final phase to reveal only the package's designated ending and truths. With AI unavailable, manual progression and the ending still work. See the [text-play contract](docs/contracts/package-play.md).
+>
+> This remains `runtime_ready=false`. Real AI quality and the new migration/concurrency on real PostgreSQL are unverified. Commercial win/loss rules, natural dialogue, facilitation and voice are not connected. Migration `o5b6c7d8e9f0` has not been applied to real PostgreSQL.
+>
+> 4B validation status: 1378 backend tests passed (363 existing deprecation warnings, 12.35 seconds; 183 new tests included), along with 152 tests across eight frontend suites, full TypeScript, changed-file lint with CommonJS test files explicitly configured, preflight and 16 preflight self-tests. The isolated synthetic browser fixture passed explicit creation, AI reference selection and formal sharing, human sharing with dependent unlocks, three-stage advancement, designated truth reveal, reload/re-entry, access checks and 390px layout. It produced one play, six events and one simulated SDK call, with zero real model calls. The opening was unchanged, browser space 60 was closed, and temporary API 18017/frontend 13017 exited with their ports confirmed closed. The final production build passed with 26 pages; the production API remains http://127.0.0.1:8010.
+
 [中文版本](README.md)
 
 An AI-powered murder mystery game system where all characters are played by AI. The project consists of both frontend and backend components, built with modern technology stacks.
@@ -97,7 +116,7 @@ jubensha/
    
    Copy and edit the `.env` file:
    ```bash
-   cp .env.example .env
+   test -e .env || cp .env.example .env
    # Edit the .env file to set your API keys and other configurations
    ```
    
@@ -133,7 +152,7 @@ jubensha/
    
    Copy and edit the `.env` file:
    ```bash
-   cp .env.example .env
+   test -e .env || cp .env.example .env
    # Edit the .env file to set backend API address
    ```
 
@@ -169,7 +188,7 @@ jubensha/
 - **MinIO** - Object storage service
 
 ### Frontend Technology Stack
-- **Next.js 15** - React framework
+- **Next.js 16** - React framework
 - **React 19** - Frontend UI library
 - **TypeScript** - JavaScript superset
 - **Tailwind CSS** - CSS framework

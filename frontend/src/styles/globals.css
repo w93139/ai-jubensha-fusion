@@ -137,3 +137,103 @@ body {
 *::-webkit-scrollbar-thumb:hover {
   background: rgba(198, 161, 95, 0.55);
 }
+
+/* The game header and every in-page destination share the measured height. */
+.app-shell { --app-dock-offset: 0px; }
+.app-content { padding-left: var(--app-dock-offset); }
+.play-page {
+  --play-site-offset: 3.5rem;
+  --play-navigation-height: 8rem;
+}
+.play-topbar { top: var(--play-site-offset); }
+.play-feedback { top: calc(var(--play-site-offset) + var(--play-navigation-height) + 0.5rem); }
+.play-page :is(#play-reading, #play-discussion, #play-memories, #play-finale, #play-phase-actions, [id^="play-message-"]) {
+  scroll-margin-top: calc(var(--play-site-offset) + var(--play-navigation-height) + 1rem);
+}
+.play-nav-action,
+.play-topbar-primary > .contents > button,
+.play-topbar-tools > button {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: center;
+  box-shadow: none;
+}
+.play-nav-action:not([aria-disabled="true"]),
+.play-topbar-primary > .contents > button { color: var(--color-brass); }
+.play-topbar a:hover,
+.play-topbar nav button:hover:not(:disabled) { background: var(--color-raised); }
+.play-topbar [aria-disabled="true"] { font-size: 0.75rem; }
+.play-page aside[aria-label="底部发言面板"] {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - var(--play-site-offset) - var(--play-navigation-height) - 1rem);
+  left: var(--app-dock-offset, 0px);
+  transition: left 300ms ease;
+}
+.play-page aside[aria-label="底部发言面板"] > div:first-child { flex-shrink: 0; }
+.play-page #play-composer { min-height: 0; }
+@media (min-width: 768px) {
+  .app-shell { --app-dock-offset: var(--app-desktop-dock-width, 0px); }
+  .play-page { --play-site-offset: 0px; }
+}
+
+/* Opening action stays calm while reading; feedback only follows interaction. */
+.opening-start {
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+.opening-start-arrow { transition: transform 160ms ease; }
+.opening-start:hover,
+.opening-start:focus-visible {
+  box-shadow: 0 4px 14px rgb(198 161 95 / 20%);
+  filter: brightness(1.06);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .opening-start:hover { transform: translateY(-1px); }
+  .opening-start:hover .opening-start-arrow { transform: translateX(2px); }
+  .opening-start:active { transform: translateY(0) scale(0.98); }
+}
+
+/* Compact two-row game navigation; tools open outside the sticky header. */
+.play-topbar { overflow: visible; }
+.play-header-row { flex-wrap: nowrap; }
+.play-header-title { flex: 1 1 0; }
+.play-top-actions { max-width: 100%; }
+.play-topbar-primary > .play-nav-action,
+.play-topbar-primary > .contents > button,
+.play-topbar-primary > .play-more-tools { flex: 1 1 0; }
+.play-more-tools > summary { width: 100%; list-style: none; }
+.play-more-tools > summary::-webkit-details-marker { display: none; }
+.play-more-tools > summary::after { content: '⌄'; margin-left: 0.35rem; }
+.play-more-content { max-height: min(65dvh, calc(100dvh - var(--play-site-offset) - var(--play-navigation-height) - 1rem)); }
+
+/* One narrow rail replaces the app Dock; popout and rail share a hover region. */
+.play-round-rail { display: none; width: 56px; }
+.play-round-peek { left: 55px; width: min(320px, calc(100vw - 56px)); }
+.play-round-tab[aria-expanded="true"] { color: var(--color-paper); background: var(--color-raised); border-color: var(--color-brass-dim); }
+@media (min-width: 1024px) {
+  .app-shell[data-game-workspace="true"]:has([aria-label="每轮线索与记录"]) { --play-workspace-width: 56px; }
+  .app-shell[data-game-workspace="true"]:has([data-round-rail][data-pinned="true"]) { --play-workspace-width: 376px; }
+  .play-round-rail { display: block; }
+  .play-topbar [data-round-mobile-trigger] { display: none; }
+}
+.app-shell[data-game-workspace="true"] .app-content,
+.app-shell[data-game-workspace="true"] .play-page aside[aria-label="底部发言面板"] { transition: none; }
+@media (max-width: 639px) {
+  .play-header-title h2 { font-size: 1.125rem; line-height: 1.5rem; }
+  .play-header-title p { font-size: 0.6875rem; line-height: 1rem; }
+  .play-top-actions { gap: 0.25rem; }
+  .play-top-actions > button { gap: 0.25rem; padding-inline: 0.5rem; font-size: 0.75rem; white-space: nowrap; }
+  .play-top-actions > button > svg { width: 1rem; height: 1rem; }
+  .play-topbar-primary .play-nav-action,
+  .play-topbar-primary > .contents > button { padding-inline: 0; font-size: 0.75rem; letter-spacing: -0.02em; white-space: nowrap; }
+  .play-topbar-primary [data-round-mobile-trigger] > svg { display: none; }
+  .play-topbar-primary .play-previous-round > svg { display: none; }
+}

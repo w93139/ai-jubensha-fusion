@@ -59,7 +59,7 @@ class GameSession(BaseSQLAlchemyModel):
             'session_id': self.session_id,
             'script_id': self.script_id,
             'host_user_id': self.host_user_id,
-            'status': self.status,
+            'status': self.status.value if isinstance(self.status, GameSessionStatus) else self.status,
             'mode': self.mode,
             'current_phase': self.current_phase,
             'current_round': self.current_round,

@@ -1,0 +1,164 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "预检：仅离线元数据",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["-I", "-B", "${workspaceFolder}/scripts/dev_preflight.py"],
+      "options": {"cwd": "${workspaceFolder}", "env": {"PYTHONDONTWRITEBYTECODE": "1"}},
+      "problemMatcher": [],
+      "detail": "不读取 .env 内容、不加载应用、不连数据库或 Docker daemon。退出码：0=检查通过，1=编码阻塞，2=可编码但有准备/集成警告。虚拟环境不可用时可手动用系统 python3 运行此脚本。"
+    },
+    {
+      "label": "测试：预检工具（离线）",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["-B", "-m", "unittest", "discover", "-s", "scripts", "-p", "test_dev_preflight.py", "-v"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "测试：后端安全（离线）",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["-B", "${workspaceFolder}/backend/scripts/test_fusion_security.py"],
+      "options": {"cwd": "${workspaceFolder}", "env": {"PYTHON_DOTENV_DISABLED": "1", "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"}},
+      "problemMatcher": [],
+      "detail": "只运行专用安全套件；禁用 dotenv、pytest 自动插件和外部网络，使用合成数据/内存数据库。不是全部 pytest 或真实数据库集成测试。"
+    },
+    {
+      "label": "测试：前端公开/私人证据（离线）",
+      "type": "process",
+      "command": "node",
+      "args": ["--test", "tests/fusion-evidence-panel.test.cjs", "tests/source-bundle-panel.test.cjs", "tests/script-review-panel.test.cjs", "tests/authoring-jobs-panel.test.cjs", "tests/script-publication-panel.test.cjs", "tests/package-preview-service.test.cjs", "tests/package-flow-panel.test.cjs", "tests/package-play-panel.test.cjs"],
+      "options": {"cwd": "${workspaceFolder}/frontend"},
+      "problemMatcher": []
+    },
+    {
+      "label": "检查：TypeScript（不生成文件）",
+      "type": "process",
+      "command": "node",
+      "args": ["node_modules/typescript/bin/tsc", "--noEmit", "--incremental", "false"],
+      "options": {"cwd": "${workspaceFolder}/frontend"},
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "检查：前端质量（离线）",
+      "type": "process",
+      "command": "npm",
+      "args": ["run", "check"],
+      "options": {"cwd": "${workspaceFolder}/frontend"},
+      "problemMatcher": []
+    },
+    {
+      "label": "测试：全部离线检查",
+      "dependsOrder": "sequence",
+      "dependsOn": ["测试：预检工具（离线）", "测试：后端安全（离线）", "测试：前端公开/私人证据（离线）", "检查：TypeScript（不生成文件）", "检查：前端质量（离线）"],
+      "group": {"kind": "test", "isDefault": true},
+      "problemMatcher": [],
+      "detail": "默认测试任务只执行离线验证。预检单独运行，以免把退出码 2（警告）误当成代码测试失败。不会启动服务、安装依赖或生成 API 客户端。"
+    },
+    {
+      "label": "数据库：启动本地 PostgreSQL 55432",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["${workspaceFolder}/scripts/local_postgres.py", "start"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": [],
+      "detail": "只启动本项目专用的回环地址数据库，不建库、不迁移、不清理数据；重复运行是安全的。"
+    },
+    {
+      "label": "数据库：检查本地 PostgreSQL 55432",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["${workspaceFolder}/scripts/local_postgres.py", "status"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "数据库：安全停止本地 PostgreSQL 55432",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["${workspaceFolder}/scripts/local_postgres.py", "stop"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": [],
+      "detail": "快速停止专用服务，不删除数据库文件；下次可再次启动。"
+    },
+    {
+      "label": "数据库：升级结构到最新版",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["-m", "alembic", "-c", "src/db/migrations/alembic.ini", "upgrade", "head"],
+      "options": {"cwd": "${workspaceFolder}/backend"},
+      "problemMatcher": [],
+      "detail": "只执行已版本化的 Alembic 向前迁移，不清库、不降级；数据库连接来自受保护的根 .env。"
+    },
+    {
+      "label": "缓存：启动本地 Redis 56379",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["${workspaceFolder}/scripts/local_redis.py", "start"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": [],
+      "detail": "只启动本项目专用的回环地址 Redis，不连接 Docker；重复运行是安全的。"
+    },
+    {
+      "label": "缓存：检查本地 Redis 56379",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["${workspaceFolder}/scripts/local_redis.py", "status"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    },
+    {
+      "label": "缓存：安全停止本地 Redis 56379",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["${workspaceFolder}/scripts/local_redis.py", "stop"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": [],
+      "detail": "确认目标属于本项目后保存并停止，不删除数据文件。"
+    },
+    {
+      "label": "环境：准备本地依赖并迁移",
+      "dependsOrder": "sequence",
+      "dependsOn": ["数据库：启动本地 PostgreSQL 55432", "缓存：启动本地 Redis 56379", "数据库：升级结构到最新版"],
+      "problemMatcher": [],
+      "detail": "调试后端前依次启动两项本机依赖并向前迁移；这些操作均可重复运行。"
+    },
+    {
+      "label": "确认：手动启动服务（输入 START）",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["-I", "-c", "import sys; answer = input('警告：接下来会启动本地服务并加载 .env；后端可能连接数据库并建表，游戏操作可能调用付费模型。这不是安全演示模式。请先核对数据库目标、备份、凭据与端口；仅确认继续时输入 START：'); sys.exit(0 if answer == 'START' else 1)"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "presentation": {"reveal": "always", "focus": true, "panel": "dedicated"},
+      "problemMatcher": []
+    },
+    {
+      "label": "手动启动：后端 127.0.0.1:8010（有副作用）",
+      "type": "process",
+      "command": "${workspaceFolder}/backend/.venv/bin/python",
+      "args": ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8010"],
+      "options": {"cwd": "${workspaceFolder}/backend", "env": {"ENV": "development", "DB_HOST": "127.0.0.1", "DB_PORT": "55432", "REDIS_URL": "redis://127.0.0.1:56379/0", "CORS_ORIGINS": "http://127.0.0.1:3001,http://localhost:3001", "ENABLE_MEDIA_FEATURES": "false"}},
+      "dependsOn": ["确认：手动启动服务（输入 START）", "环境：准备本地依赖并迁移"],
+      "dependsOrder": "sequence",
+      "presentation": {"reveal": "always", "panel": "dedicated"},
+      "problemMatcher": [],
+      "detail": "仅手动运行，不热重载、不清库。先安全启动专用 PostgreSQL 和 Redis，再从受保护的根 .env 读取库名/用户/密码；任务只覆盖本地地址、CORS 和关闭媒体。仅绑定本机；只有实际游戏模型请求才可能收费。"
+    },
+    {
+      "label": "手动启动：前端 127.0.0.1:3001（有副作用）",
+      "type": "process",
+      "command": "npm",
+      "args": ["run", "dev", "--", "--hostname", "127.0.0.1"],
+      "options": {"cwd": "${workspaceFolder}/frontend", "env": {"NEXT_PUBLIC_API_URL": "http://127.0.0.1:8010"}},
+      "dependsOn": "确认：手动启动服务（输入 START）",
+      "dependsOrder": "sequence",
+      "presentation": {"reveal": "always", "panel": "dedicated"},
+      "problemMatcher": [],
+      "detail": "仅手动运行；Next 会读取根 .env 并写开发缓存。任务固定连接本机 8010 后端，避免把生产同源 / 误用到宿主机开发。不会调用模型；若端口占用先核对现有服务。"
+    }
+  ]
+}

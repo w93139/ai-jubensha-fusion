@@ -7,8 +7,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from sqlalchemy import create_engine
+from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker
+
+from src.core.environment import load_project_environment
+
+load_project_environment()
 
 from src.db.models.background_story import BackgroundStoryDBModel
 from src.db.models.character import CharacterDBModel
@@ -177,10 +181,14 @@ SCRIPTS = [
 ]
 
 
-def database_url() -> str:
-    return (
-        f"postgresql+psycopg://{os.getenv('DB_USER', 'jubensha')}:{os.getenv('DB_PASSWORD', '')}"
-        f"@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '5432')}/{os.getenv('DB_NAME', 'jubensha')}"
+def database_url() -> URL:
+    return URL.create(
+        "postgresql+psycopg",
+        username=os.getenv("DB_USER", "jubensha"),
+        password=os.getenv("DB_PASSWORD", ""),
+        host=os.getenv("DB_HOST", "localhost"),
+        port=int(os.getenv("DB_PORT", "5432")),
+        database=os.getenv("DB_NAME", "jubensha"),
     )
 
 

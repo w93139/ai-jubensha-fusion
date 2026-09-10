@@ -1,0 +1,96 @@
+{
+  "$defs": {
+    "PackageFlowTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "collection": {
+          "enum": [
+            "knowledge",
+            "evidence"
+          ],
+          "title": "Collection",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "collection",
+        "id"
+      ],
+      "title": "PackageFlowTarget",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "not": {
+          "required": [
+            "target"
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "action": {
+            "const": "SHARE_MATERIAL"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    }
+  ],
+  "properties": {
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "expected_revision": {
+      "minimum": 0,
+      "title": "Expected Revision",
+      "type": "integer"
+    },
+    "action": {
+      "enum": [
+        "ADVANCE_PHASE",
+        "SHARE_MATERIAL"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "target": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PackageFlowTarget"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "idempotency_key",
+    "expected_revision",
+    "action"
+  ],
+  "title": "PackageFlowActionRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

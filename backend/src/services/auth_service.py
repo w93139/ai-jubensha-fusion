@@ -4,15 +4,17 @@ import hmac
 import secrets
 from datetime import datetime, timedelta
 from typing import Optional, Union
-from passlib.context import CryptContext  # type: ignore  
+from pwdlib import PasswordHash
+from pwdlib.hashers.argon2 import Argon2Hasher
+from pwdlib.hashers.bcrypt import BcryptHasher
 from jose import JWTError, jwt  # type: ignore
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from src.db.models.user import User
 from src.schemas.user_schemas import TokenData
 
-# 密码加密上下文
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# 新密码使用 Argon2；BcryptHasher 只用于兼容已有 bcrypt 密码。
+password_hash = PasswordHash((Argon2Hasher(), BcryptHasher()))
 
 # JWT配置
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
@@ -25,12 +27,12 @@ class AuthService:
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """验证密码"""
-        return pwd_context.verify(plain_password, hashed_password)
+        return password_hash.verify(plain_password, hashed_password)
     
     @staticmethod
     def get_password_hash(password: str) -> str:
         """获取密码哈希"""
-        return pwd_context.hash(password)
+        return password_hash.hash(password)
     
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -167,7 +169,7 @@ class AuthService:
         )
         key = f"auth:sms:code:{phone}"
         expected = redis_client.get(key)
-        if not expected or not hmac.compare_digest(expected, code):
+        if not expected or not hmac.compare_digest(str(expected), code):
             raise HTTPException(status_code=400, detail="验证码错误或已过期")
         redis_client.delete(key)
 

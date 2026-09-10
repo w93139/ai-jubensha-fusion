@@ -4,9 +4,14 @@ applyTo: 'backend/**'
 
 # 后端开发规范
 
+当前入口与安全边界以根AGENTS.md、docs/development/README.md为准。
+默认测试使用backend/.venv/bin/python backend/scripts/test_fusion_security.py（仓库根目录）。
+不要自动发现旧全量pytest：tests/conftest.py可能初始化应用。下列启动/安装命令仅是手动操作，
+必须先确认数据库目标和可恢复备份；不因为“准备开发”而连接真实库或调用付费模型。
+
 ## 基础配置
 
-- **语言**: Python 3.13+，包管理使用 `uv`
+- **语言**: Python >=3.13,<3.14，包管理使用 `uv`，以pyproject.toml为准
 - **框架**: FastAPI，入口 `main.py` → 应用组装在 `src/core/server.py`
 - **ORM**: SQLAlchemy（同步模式），数据库 PostgreSQL
 - **类型检查**: pyright（见 `pyrightconfig.json`）
@@ -85,31 +90,20 @@ async def handler(db: Session = get_db_session_depends()): ...
 
 ## 认证
 
-项目使用**中间件 + 传统 Depends 共存**模式，详见 [AUTH_MIDDLEWARE_GUIDE.md](../docs/AUTH_MIDDLEWARE_GUIDE.md)。
+当前统一认证入口为 `src/core/auth_middleware.py`：
+路径策略为 `NONE / OPTIONAL / REQUIRED / ADMIN`，读取用户也使用该模块的
+`get_current_user_from_request`、`get_current_active_user_from_request`、
+`get_current_admin_user_from_request`。不要引用已不存在的旧middleware_dependencies/auth_dependencies模块。
 
-### 中间件认证（推荐用于新路由）
-- 配置在 `src/core/auth_middleware.py`，按路径正则设置策略：`NONE` / `OPTIONAL` / `REQUIRED` / `ADMIN`
-- 中间件注入 `request.state.current_user` 和 `request.state.is_authenticated`
-- 读取用户：通过 `src/core/middleware_dependencies.py` 的辅助函数
-
-### Depends 认证（存量路由）
-- 使用 `Depends(get_current_active_user)` from `src/core/auth_dependencies.py`
+身份认证与对象权限不同：Fusion仍须检查本局、角色、剧本与阶段归属。
+管理员旧编辑入口不能绕过后续的人审/版本发布门禁。
 
 ```python
-# 中间件方式（推荐）
-from src.core.middleware_dependencies import get_current_active_user_from_request
+from src.core.auth_middleware import get_current_active_user_from_request
 
 @router.get("/me")
 async def get_profile(request: Request):
-    user = get_current_active_user_from_request(request)
-    return user
-
-# Depends 方式（存量）
-from src.core.auth_dependencies import get_current_active_user
-
-@router.get("/me")
-async def get_profile(current_user: User = Depends(get_current_active_user)):
-    return current_user
+    return get_current_active_user_from_request(request)
 ```
 
 ## 数据库与 ORM
@@ -152,9 +146,9 @@ class ScriptInfo(BaseDataModel):
 
 测试位于 `tests/`，使用 pytest，标记：`api`、`unit`、`integration`、`slow`。
 
-- `conftest.py` 提供 `test_client`（模块级）、`mock_db_session`（autouse，全局 mock 数据库）、`mock_current_user`
-- `factories.py` 提供可复用的模型工厂函数
-- 单元测试不连接真实数据库，完全使用 mock
+- 旧 `conftest.py` 有历史fixture，但应用初始化可能先于mock发生，不能视为全局安全隔离。
+- 默认通过 `scripts/test_fusion_security.py` 专用入口运行，禁用dotenv/网络并使用虚构数据；不要直接调用旧全量pytest。
+- `factories.py` 提供历史模型工厂；新增单元测试仍应显式隔离数据库和模型。
 
 ```python
 import pytest
@@ -182,4 +176,3 @@ def test_get_scripts(test_client):
 | [SERVICE_ARCHITECTURE.md](../docs/SERVICE_ARCHITECTURE.md) | 服务层设计模式 |
 | [MINIMAX_CLIENT_GUIDE.md](../docs/MINIMAX_CLIENT_GUIDE.md) | MiniMax TTS/图像集成 |
 | [README_SCRIPT_MANAGER.md](../docs/README_SCRIPT_MANAGER.md) | 剧本管理功能 |
-

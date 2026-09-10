@@ -2,9 +2,9 @@
 import os
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
-from dotenv import load_dotenv
+from src.core.environment import load_project_environment
 
-load_dotenv()
+load_project_environment()
 
 @dataclass
 class LLMConfig:
@@ -65,7 +65,7 @@ class ConfigManager:
                 provider=os.getenv("LLM_PROVIDER", "deepseek"),
                 api_key=os.getenv("DEEPSEEK_API_KEY", os.getenv("OPENAI_API_KEY", "")),
                 base_url=os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
-                model=os.getenv("DEEPSEEK_MODEL", "deepseek-chat"),
+                model=os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash"),
                 max_tokens=int(os.getenv("LLM_MAX_TOKENS", "1000")),
                 temperature=float(os.getenv("LLM_TEMPERATURE", "0.7"))
             )

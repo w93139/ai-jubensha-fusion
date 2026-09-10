@@ -1,0 +1,33 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "approval_id": {
+      "exclusiveMinimum": 0,
+      "title": "Approval Id",
+      "type": "integer"
+    },
+    "expected_approval_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Approval Hash",
+      "type": "string"
+    },
+    "expected_basis_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Basis Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "idempotency_key",
+    "approval_id",
+    "expected_approval_hash",
+    "expected_basis_hash"
+  ],
+  "title": "PublishPackageRequest",
+  "type": "object"
+}

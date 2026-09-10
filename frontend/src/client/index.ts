@@ -12,7 +12,7 @@ export type { APIResponse_dict_ } from './models/APIResponse_dict_';
 export type { APIResponse_Dict_str__Any__ } from './models/APIResponse_Dict_str__Any__';
 export type { APIResponse_Dict_str__str__ } from './models/APIResponse_Dict_str__str__';
 export type { APIResponse_EditResultResponse_ } from './models/APIResponse_EditResultResponse_';
-export type { APIResponse_list_ScriptCharacter__ } from './models/APIResponse_list_ScriptCharacter__';
+export type { APIResponse_list_ScriptCharacter__ } from './models/APIResponse_List_ScriptCharacter__';
 export type { APIResponse_ParsedInstructionsResponse_ } from './models/APIResponse_ParsedInstructionsResponse_';
 export type { APIResponse_Script_ } from './models/APIResponse_Script_';
 export type { APIResponse_ScriptCharacter_ } from './models/APIResponse_ScriptCharacter_';

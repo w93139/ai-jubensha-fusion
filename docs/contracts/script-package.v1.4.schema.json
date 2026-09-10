@@ -1,0 +1,2044 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "AccusationIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "available_when": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/FinaleMaterialRef"
+            },
+            "type": "array"
+          },
+          "maxItems": 100,
+          "title": "Available When",
+          "type": "array"
+        },
+        "heard_terms": {
+          "items": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Heard Terms",
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Label",
+          "type": "string"
+        },
+        "group_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Group Id",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "group_id",
+        "sources"
+      ],
+      "title": "AccusationIdentity",
+      "type": "object"
+    },
+    "AnswerAtom": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ANSWER_MATCH",
+          "title": "Kind",
+          "type": "string"
+        },
+        "question_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Question Id",
+          "type": "string"
+        },
+        "option_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "Option Ids",
+          "type": "array"
+        },
+        "mode": {
+          "enum": [
+            "EXACT",
+            "CONTAINS"
+          ],
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "question_id",
+        "option_ids",
+        "mode"
+      ],
+      "title": "AnswerAtom",
+      "type": "object"
+    },
+    "CountAtom": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "GROUP_VOTES",
+            "IDENTITY_VOTES",
+            "EXTERNAL_GROUP_VOTES",
+            "TRUST_COUNT"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "target_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Target Id",
+          "type": "string"
+        },
+        "excluded_actor": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Excluded Actor"
+        },
+        "op": {
+          "enum": [
+            "EQ",
+            "GE",
+            "GT"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Value",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "target_id",
+        "op",
+        "value"
+      ],
+      "title": "CountAtom",
+      "type": "object"
+    },
+    "EvidenceMemoryTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ACQUIRED_EVIDENCE",
+          "title": "Kind",
+          "type": "string"
+        },
+        "evidence_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Evidence Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "evidence_id"
+      ],
+      "title": "EvidenceMemoryTrigger",
+      "type": "object"
+    },
+    "FactTerm": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fact_id",
+        "expected"
+      ],
+      "title": "FactTerm",
+      "type": "object"
+    },
+    "FinaleEnding": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "when": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/FactTerm"
+            },
+            "maxItems": 50,
+            "type": "array"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "When",
+          "type": "array"
+        },
+        "truth_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Truth Ids",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "when",
+        "truth_ids",
+        "sources"
+      ],
+      "title": "FinaleEnding",
+      "type": "object"
+    },
+    "FinaleEndingGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "character_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Character Ids",
+          "type": "array"
+        },
+        "branches": {
+          "items": {
+            "$ref": "#/$defs/FinaleEnding"
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Branches",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "character_ids",
+        "branches"
+      ],
+      "title": "FinaleEndingGroup",
+      "type": "object"
+    },
+    "FinaleFact": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "items": {
+                "items": {
+                  "discriminator": {
+                    "mapping": {
+                      "ALL_MEMORIES": "#/$defs/MemoryAtom",
+                      "ANSWER_MATCH": "#/$defs/AnswerAtom",
+                      "ANSWER_SUPPORT": "#/$defs/SupportAtom",
+                      "EXTERNAL_GROUP_VOTES": "#/$defs/CountAtom",
+                      "GROUP_VOTES": "#/$defs/CountAtom",
+                      "IDENTITY_MORE": "#/$defs/MoreAtom",
+                      "IDENTITY_VOTES": "#/$defs/CountAtom",
+                      "TRUST_COUNT": "#/$defs/CountAtom",
+                      "TRUST_MORE": "#/$defs/MoreAtom",
+                      "TRUST_TO": "#/$defs/TrustAtom"
+                    },
+                    "propertyName": "kind"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/$defs/AnswerAtom"
+                    },
+                    {
+                      "$ref": "#/$defs/SupportAtom"
+                    },
+                    {
+                      "$ref": "#/$defs/CountAtom"
+                    },
+                    {
+                      "$ref": "#/$defs/MoreAtom"
+                    },
+                    {
+                      "$ref": "#/$defs/TrustAtom"
+                    },
+                    {
+                      "$ref": "#/$defs/MemoryAtom"
+                    }
+                  ]
+                },
+                "maxItems": 50,
+                "type": "array"
+              },
+              "maxItems": 50,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "When"
+        },
+        "origin": {
+          "enum": [
+            "SOURCE_EXPLICIT",
+            "EDITORIAL"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "when",
+        "origin",
+        "sources"
+      ],
+      "title": "FinaleFact",
+      "type": "object"
+    },
+    "FinaleGoal": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "character_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Character Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Title",
+          "type": "string"
+        },
+        "parts": {
+          "items": {
+            "$ref": "#/$defs/FinaleScorePart"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Parts",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "character_id",
+        "title",
+        "parts",
+        "sources"
+      ],
+      "title": "FinaleGoal",
+      "type": "object"
+    },
+    "FinaleMaterialRef": {
+      "additionalProperties": false,
+      "properties": {
+        "collection": {
+          "enum": [
+            "knowledge",
+            "evidence",
+            "memory"
+          ],
+          "title": "Collection",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "collection",
+        "id"
+      ],
+      "title": "FinaleMaterialRef",
+      "type": "object"
+    },
+    "FinaleOption": {
+      "additionalProperties": false,
+      "properties": {
+        "available_when": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/FinaleMaterialRef"
+            },
+            "type": "array"
+          },
+          "maxItems": 100,
+          "title": "Available When",
+          "type": "array"
+        },
+        "heard_terms": {
+          "items": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Heard Terms",
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 300,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "FinaleOption",
+      "type": "object"
+    },
+    "FinaleScorePart": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "points": {
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Points",
+          "type": "integer"
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explanation"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "items": {
+                "items": {
+                  "$ref": "#/$defs/FactTerm"
+                },
+                "maxItems": 50,
+                "type": "array"
+              },
+              "maxItems": 50,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "When"
+        },
+        "ending_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+                "type": "string"
+              },
+              "maxItems": 30,
+              "minItems": 1,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ending Ids"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "points",
+        "when",
+        "sources"
+      ],
+      "title": "FinaleScorePart",
+      "type": "object"
+    },
+    "FinaleVotePlan": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "finale-vote-plan/1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "character_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 5,
+          "title": "Character Ids",
+          "type": "array"
+        },
+        "identities": {
+          "items": {
+            "$ref": "#/$defs/AccusationIdentity"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Identities",
+          "type": "array"
+        },
+        "majority_threshold": {
+          "const": 3,
+          "title": "Majority Threshold",
+          "type": "integer"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "character_ids",
+        "identities",
+        "majority_threshold",
+        "sources"
+      ],
+      "title": "FinaleVotePlan",
+      "type": "object"
+    },
+    "FullPlayActionOrder": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Action Id",
+          "type": "string"
+        },
+        "order": {
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "action_id",
+        "order"
+      ],
+      "title": "FullPlayActionOrder",
+      "type": "object"
+    },
+    "FullPlayMechanics": {
+      "additionalProperties": false,
+      "properties": {
+        "phases": {
+          "items": {
+            "$ref": "#/$defs/FullPlayPhase"
+          },
+          "maxItems": 100,
+          "minItems": 3,
+          "title": "Phases",
+          "type": "array"
+        },
+        "action_order": {
+          "items": {
+            "$ref": "#/$defs/FullPlayActionOrder"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Action Order",
+          "type": "array"
+        },
+        "finale": {
+          "$ref": "#/$defs/StructuredFinalePlan"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phases",
+        "action_order",
+        "finale",
+        "sources"
+      ],
+      "title": "FullPlayMechanics",
+      "type": "object"
+    },
+    "FullPlayPhase": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "READING",
+            "INVESTIGATION",
+            "FINALE"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_id",
+        "kind",
+        "sources"
+      ],
+      "title": "FullPlayPhase",
+      "type": "object"
+    },
+    "HeardMemoryTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "OTHER_HEARD_SPEECH",
+          "title": "Kind",
+          "type": "string"
+        },
+        "keywords": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Keywords",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "keywords"
+      ],
+      "title": "HeardMemoryTrigger",
+      "type": "object"
+    },
+    "InvestigationAction": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Label",
+          "type": "string"
+        },
+        "cost": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Cost",
+          "type": "integer"
+        },
+        "phase_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Phase Ids",
+          "type": "array"
+        },
+        "allowed_character_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Allowed Character Ids",
+          "type": "array"
+        },
+        "required_action_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Action Ids",
+          "type": "array"
+        },
+        "required_public_evidence_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Public Evidence Ids",
+          "type": "array"
+        },
+        "origin": {
+          "enum": [
+            "SOURCE_EXPLICIT",
+            "EDITORIAL"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "cost",
+        "phase_ids",
+        "allowed_character_ids",
+        "origin",
+        "sources"
+      ],
+      "title": "InvestigationAction",
+      "type": "object"
+    },
+    "InvestigationMechanics": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_budgets": {
+          "items": {
+            "$ref": "#/$defs/PhaseActionBudget"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Phase Budgets",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/InvestigationAction"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_budgets",
+        "actions"
+      ],
+      "title": "InvestigationMechanics",
+      "type": "object"
+    },
+    "KnowledgeItemV14": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "FACT",
+            "CLAIM",
+            "INFERENCE"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "PUBLIC",
+            "CHARACTER_PRIVATE"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "character_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Character Id"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseRuleV12"
+        },
+        "disclosure": {
+          "enum": [
+            "PUBLIC",
+            "MAY_SHARE",
+            "MUST_SHARE",
+            "KEEP_PRIVATE"
+          ],
+          "title": "Disclosure",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "retelling": {
+          "anyOf": [
+            {
+              "enum": [
+                "MAY_RETELL",
+                "MUST_RETELL"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retelling"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "kind",
+        "visibility",
+        "character_id",
+        "release",
+        "disclosure",
+        "sources"
+      ],
+      "title": "KnowledgeItemV14",
+      "type": "object"
+    },
+    "MemoryAtom": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ALL_MEMORIES",
+          "title": "Kind",
+          "type": "string"
+        },
+        "character_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Character Id",
+          "type": "string"
+        },
+        "memory_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Memory Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "character_id",
+        "memory_ids"
+      ],
+      "title": "MemoryAtom",
+      "type": "object"
+    },
+    "MoreAtom": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "TRUST_MORE",
+            "IDENTITY_MORE"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "left_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Left Id",
+          "type": "string"
+        },
+        "right_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Right Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "left_id",
+        "right_id"
+      ],
+      "title": "MoreAtom",
+      "type": "object"
+    },
+    "PackageCharacter": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "sources"
+      ],
+      "title": "PackageCharacter",
+      "type": "object"
+    },
+    "PackageEvidenceV12": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "PUBLIC",
+            "CHARACTER_PRIVATE"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "character_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Character Id"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseRuleV12"
+        },
+        "disclosure": {
+          "enum": [
+            "PUBLIC",
+            "MAY_SHARE",
+            "MUST_SHARE",
+            "KEEP_PRIVATE"
+          ],
+          "title": "Disclosure",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "visibility",
+        "character_id",
+        "release",
+        "disclosure",
+        "sources"
+      ],
+      "title": "PackageEvidenceV12",
+      "type": "object"
+    },
+    "PackagePhase": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Title",
+          "type": "string"
+        },
+        "next_phase_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Phase Id"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "next_phase_id",
+        "sources"
+      ],
+      "title": "PackagePhase",
+      "type": "object"
+    },
+    "PackageVisual": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "collection": {
+          "enum": [
+            "knowledge",
+            "evidence",
+            "memory"
+          ],
+          "title": "Collection",
+          "type": "string"
+        },
+        "material_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Material Id",
+          "type": "string"
+        },
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Label",
+          "type": "string"
+        },
+        "exposure": {
+          "const": "WHOLE_ORIGINAL_IMAGE",
+          "title": "Exposure",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "collection",
+        "material_id",
+        "source_id",
+        "label",
+        "exposure"
+      ],
+      "title": "PackageVisual",
+      "type": "object"
+    },
+    "PhaseActionBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "points": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Points",
+          "type": "integer"
+        },
+        "advance_policy": {
+          "enum": [
+            "ALLOW_REMAINING",
+            "REQUIRE_EXHAUSTED"
+          ],
+          "title": "Advance Policy",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "SOURCE_EXPLICIT",
+            "EDITORIAL"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_id",
+        "points",
+        "advance_policy",
+        "origin",
+        "sources"
+      ],
+      "title": "PhaseActionBudget",
+      "type": "object"
+    },
+    "PrivateMemoryV14": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "character_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Character Id",
+          "type": "string"
+        },
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Title",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "FACT",
+            "CLAIM",
+            "INFERENCE"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "card_disclosure": {
+          "const": "KEEP_PRIVATE",
+          "title": "Card Disclosure",
+          "type": "string"
+        },
+        "retelling": {
+          "enum": [
+            "MAY_RETELL",
+            "MUST_RETELL"
+          ],
+          "title": "Retelling",
+          "type": "string"
+        },
+        "triggers": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "ACQUIRED_EVIDENCE": "#/$defs/EvidenceMemoryTrigger",
+                "OTHER_HEARD_SPEECH": "#/$defs/HeardMemoryTrigger"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/HeardMemoryTrigger"
+              },
+              {
+                "$ref": "#/$defs/EvidenceMemoryTrigger"
+              }
+            ]
+          },
+          "maxItems": 30,
+          "minItems": 1,
+          "title": "Triggers",
+          "type": "array"
+        },
+        "origin": {
+          "enum": [
+            "SOURCE_EXPLICIT",
+            "EDITORIAL"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "character_id",
+        "phase_id",
+        "title",
+        "text",
+        "kind",
+        "card_disclosure",
+        "retelling",
+        "triggers",
+        "origin",
+        "sources"
+      ],
+      "title": "PrivateMemoryV14",
+      "type": "object"
+    },
+    "ReleaseRuleV12": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "required_public_evidence_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Public Evidence Ids",
+          "type": "array"
+        },
+        "required_action_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Action Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_id"
+      ],
+      "title": "ReleaseRuleV12",
+      "type": "object"
+    },
+    "Settlement": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "truth_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Truth Ids",
+          "type": "array"
+        },
+        "instructions": {
+          "$ref": "#/$defs/SourcedText"
+        }
+      },
+      "required": [
+        "phase_id",
+        "truth_ids",
+        "instructions"
+      ],
+      "title": "Settlement",
+      "type": "object"
+    },
+    "SourceFileV11": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "original_source_ids": {
+                "maxItems": 0
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "normalized"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "original_source_ids": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "else": {
+            "not": {
+              "required": [
+                "provenance_note"
+              ]
+            }
+          },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "supplement"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "provenance_note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "provenance_note"
+            ]
+          }
+        }
+      ],
+      "description": "Explicit editorial provenance; source declarations never approve content.",
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "relative_path": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "original",
+            "normalized",
+            "supplement"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "application/pdf",
+            "text/plain",
+            "text/markdown",
+            "image/png",
+            "image/jpeg"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "original_source_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 200,
+          "title": "Original Source Ids",
+          "type": "array",
+          "uniqueItems": true
+        },
+        "provenance_note": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provenance Note"
+        },
+        "page_count": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Count"
+        }
+      },
+      "required": [
+        "id",
+        "relative_path",
+        "sha256",
+        "kind",
+        "media_type",
+        "original_source_ids"
+      ],
+      "title": "SourceFileV11",
+      "type": "object"
+    },
+    "SourceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        }
+      },
+      "required": [
+        "source_id"
+      ],
+      "title": "SourceReference",
+      "type": "object"
+    },
+    "SourcedText": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "sources"
+      ],
+      "title": "SourcedText",
+      "type": "object"
+    },
+    "StructuredFinalePlan": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "structured-finale-plan/1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "votes": {
+          "$ref": "#/$defs/FinaleVotePlan"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/StructuredQuestion"
+          },
+          "maxItems": 200,
+          "minItems": 5,
+          "title": "Questions",
+          "type": "array"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/FinaleFact"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "title": "Facts",
+          "type": "array"
+        },
+        "goals": {
+          "items": {
+            "$ref": "#/$defs/FinaleGoal"
+          },
+          "maxItems": 100,
+          "minItems": 5,
+          "title": "Goals",
+          "type": "array"
+        },
+        "endings": {
+          "items": {
+            "$ref": "#/$defs/FinaleEndingGroup"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Endings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "votes",
+        "questions",
+        "facts",
+        "goals",
+        "endings"
+      ],
+      "title": "StructuredFinalePlan",
+      "type": "object"
+    },
+    "StructuredQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "character_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Character Id",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Prompt",
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/FinaleOption"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Options",
+          "type": "array"
+        },
+        "max_choices": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Choices",
+          "type": "integer"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "character_id",
+        "prompt",
+        "options",
+        "max_choices",
+        "sources"
+      ],
+      "title": "StructuredQuestion",
+      "type": "object"
+    },
+    "SupportAtom": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ANSWER_SUPPORT",
+          "title": "Kind",
+          "type": "string"
+        },
+        "question_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Question Id",
+          "type": "string"
+        },
+        "fact_option_groups": {
+          "items": {
+            "items": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Fact Option Groups",
+          "type": "array"
+        },
+        "minimum_facts": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Minimum Facts",
+          "type": "integer"
+        },
+        "reject_other_options": {
+          "title": "Reject Other Options",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "question_id",
+        "fact_option_groups",
+        "minimum_facts",
+        "reject_other_options"
+      ],
+      "title": "SupportAtom",
+      "type": "object"
+    },
+    "TrustAtom": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "TRUST_TO",
+          "title": "Kind",
+          "type": "string"
+        },
+        "actor_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "target_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target Id"
+        }
+      },
+      "required": [
+        "kind",
+        "actor_id",
+        "target_id"
+      ],
+      "title": "TrustAtom",
+      "type": "object"
+    },
+    "TruthItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "visibility": {
+          "const": "SYSTEM_TRUTH",
+          "title": "Visibility",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "visibility",
+        "sources"
+      ],
+      "title": "TruthItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "script-package/1.4",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "script_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Script Key",
+      "type": "string"
+    },
+    "content_version": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Content Version",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Title",
+      "type": "string"
+    },
+    "player_count": {
+      "maximum": 8,
+      "minimum": 2,
+      "title": "Player Count",
+      "type": "integer"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/SourceFileV11"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "title": "Sources",
+      "type": "array"
+    },
+    "introduction": {
+      "$ref": "#/$defs/SourcedText"
+    },
+    "characters": {
+      "items": {
+        "$ref": "#/$defs/PackageCharacter"
+      },
+      "maxItems": 8,
+      "minItems": 2,
+      "title": "Characters",
+      "type": "array"
+    },
+    "initial_phase_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Initial Phase Id",
+      "type": "string"
+    },
+    "phases": {
+      "items": {
+        "$ref": "#/$defs/PackagePhase"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Phases",
+      "type": "array"
+    },
+    "knowledge": {
+      "items": {
+        "$ref": "#/$defs/KnowledgeItemV14"
+      },
+      "maxItems": 10000,
+      "minItems": 1,
+      "title": "Knowledge",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/PackageEvidenceV12"
+      },
+      "maxItems": 5000,
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "truth": {
+      "items": {
+        "$ref": "#/$defs/TruthItem"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "title": "Truth",
+      "type": "array"
+    },
+    "settlement": {
+      "$ref": "#/$defs/Settlement"
+    },
+    "mechanics": {
+      "$ref": "#/$defs/InvestigationMechanics"
+    },
+    "memories": {
+      "items": {
+        "$ref": "#/$defs/PrivateMemoryV14"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "title": "Memories",
+      "type": "array"
+    },
+    "full_play": {
+      "$ref": "#/$defs/FullPlayMechanics"
+    },
+    "visuals": {
+      "items": {
+        "$ref": "#/$defs/PackageVisual"
+      },
+      "maxItems": 1000,
+      "title": "Visuals",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "script_key",
+    "content_version",
+    "title",
+    "player_count",
+    "sources",
+    "introduction",
+    "characters",
+    "initial_phase_id",
+    "phases",
+    "knowledge",
+    "evidence",
+    "truth",
+    "settlement",
+    "mechanics",
+    "memories",
+    "full_play"
+  ],
+  "title": "ScriptPackageV14",
+  "type": "object"
+}

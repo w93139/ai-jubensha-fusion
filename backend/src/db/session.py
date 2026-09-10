@@ -1,7 +1,7 @@
 """数据库会话管理"""
-from typing import Generator, Optional
+from typing import Any, Generator, Optional, Union
 from contextlib import contextmanager
-from sqlalchemy import create_engine, Engine
+from sqlalchemy import create_engine, Engine, URL
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 from ..core.config import get_database_config
@@ -14,7 +14,7 @@ class DatabaseManager:
         self._engine: Optional[Engine] = None
         self._session_factory: Optional[sessionmaker] = None
     
-    def initialize(self, database_url: Optional[str] = None) -> None:
+    def initialize(self, database_url: Optional[Union[str, URL]] = None) -> None:
         """初始化数据库连接
         
         Args:
@@ -22,14 +22,22 @@ class DatabaseManager:
         """
         config = get_database_config()
         if database_url is None:
-            database_url = f"postgresql+psycopg://{config.username}:{config.password}@{config.host}:{config.port}/{config.database}"
+            database_url = URL.create(
+                "postgresql+psycopg",
+                username=config.username,
+                password=config.password,
+                host=config.host,
+                port=config.port,
+                database=config.database,
+            )
         
         # 创建引擎
-        engine_options = {
+        engine_options: dict[str, Any] = {
             "echo": False,
             "pool_pre_ping": True,
         }
-        if not database_url.startswith("sqlite"):
+        drivername = database_url.drivername if isinstance(database_url, URL) else database_url
+        if not drivername.startswith("sqlite"):
             engine_options.update({
                 "pool_recycle": 3600,
                 "pool_size": config.pool_size,
@@ -117,7 +125,7 @@ def get_db_session_from_container():
     from ..core.dependency_container import service_scope
     return service_scope()
 
-def init_database(database_url: Optional[str] = None) -> None:
+def init_database(database_url: Optional[Union[str, URL]] = None) -> None:
     """初始化数据库"""
     db_manager.initialize(database_url)
     db_manager.create_tables()

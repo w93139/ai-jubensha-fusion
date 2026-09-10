@@ -4,13 +4,14 @@ import uuid
 from typing import BinaryIO
 from minio import Minio
 from minio.error import S3Error
-from dotenv import load_dotenv
 import mimetypes
 from urllib.parse import urljoin
 from pathlib import Path
 import shutil
 
-load_dotenv()
+from src.core.environment import load_project_environment
+
+load_project_environment()
 
 class StorageConfig:
     """存储配置"""

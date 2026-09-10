@@ -1,0 +1,71 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "bundle_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Bundle Hash",
+      "type": "string"
+    },
+    "source_ids": {
+      "items": {
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+        "type": "string"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Source Ids",
+      "type": "array"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Title",
+      "type": "string"
+    },
+    "content_version": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Content Version",
+      "type": "string"
+    },
+    "player_count": {
+      "maximum": 8,
+      "minimum": 2,
+      "title": "Player Count",
+      "type": "integer"
+    },
+    "package_contract": {
+      "const": "script-package/1.2",
+      "title": "Package Contract",
+      "type": "string"
+    },
+    "rule_plan": {
+      "additionalProperties": true,
+      "title": "Rule Plan",
+      "type": "object"
+    },
+    "compiler_mode": {
+      "const": "CONFIRM_FROZEN_TEXT",
+      "title": "Compiler Mode",
+      "type": "string"
+    }
+  },
+  "required": [
+    "idempotency_key",
+    "bundle_hash",
+    "source_ids",
+    "title",
+    "content_version",
+    "player_count",
+    "package_contract",
+    "rule_plan",
+    "compiler_mode"
+  ],
+  "title": "AuthoringRequestV14",
+  "type": "object"
+}

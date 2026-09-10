@@ -10,6 +10,7 @@ import {
 } from '@/client';
 import { GameHistory, PhoneLogin, SmsCodeResponse } from '@/types/auth';
 import { config } from '@/stores/configStore';
+import { authReturnPath } from '@/lib/authReturnPath';
 
 class AuthService {
   private baseUrl: string;
@@ -41,10 +42,14 @@ class AuthService {
     if (!response.ok) {
       // 401状态码拦截器：自动退出登录
       if (response.status === 401) {
+        const returnPath = typeof window !== 'undefined'
+          && !/^\/auth(?:\/|$)/i.test(window.location.pathname)
+          ? authReturnPath(window.location.pathname + window.location.search + window.location.hash)
+          : null;
         this.removeToken();
-        // 重定向到登录页面
-        if (typeof window !== 'undefined') {
-          window.location.href = '/auth/login';
+        // Preserve the current game when an existing login expires.
+        if (returnPath !== null) {
+          window.location.href = '/auth/login?returnUrl=' + encodeURIComponent(returnPath);
         }
       }
       
@@ -66,12 +71,14 @@ class AuthService {
   setToken(token: string): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem('access_token', token);
+      window.dispatchEvent(new Event('auth-token-changed'));
     }
   }
 
   removeToken(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
+      window.dispatchEvent(new Event('auth-token-changed'));
     }
   }
 

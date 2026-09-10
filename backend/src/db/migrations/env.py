@@ -1,17 +1,20 @@
 """Alembic环境配置"""
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config
+from pathlib import Path
+
+from sqlalchemy import URL, engine_from_config
 from sqlalchemy import pool
 from alembic import context
 import os
 import sys
-from dotenv import load_dotenv
-
-# 加载环境变量
-load_dotenv()
 
 # 添加项目根目录到Python路径
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+BACKEND_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(BACKEND_ROOT))
+
+from src.core.environment import load_project_environment
+
+load_project_environment()
 
 from src.db.base import SQLAlchemyBase
 from src.db.models import *  # 导入所有模型
@@ -21,16 +24,26 @@ from src.db.models import *  # 导入所有模型
 config = context.config
 
 # 从环境变量构建数据库URL
-def get_database_url():
+def get_database_url() -> URL:
     db_host = os.getenv("DB_HOST", "localhost")
     db_port = os.getenv("DB_PORT", "5432")
     db_name = os.getenv("DB_NAME", "jubensha_db")
     db_user = os.getenv("DB_USER", "postgres")
     db_password = os.getenv("DB_PASSWORD", "")
-    return f"postgresql+psycopg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    return URL.create(
+        "postgresql+psycopg",
+        username=db_user,
+        password=db_password,
+        host=db_host,
+        port=int(db_port),
+        database=db_name,
+    )
 
 # 设置数据库URL
-config.set_main_option("sqlalchemy.url", get_database_url())
+config.set_main_option(
+    "sqlalchemy.url",
+    get_database_url().render_as_string(hide_password=False).replace("%", "%%"),
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

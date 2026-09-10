@@ -1,0 +1,192 @@
+{
+  "$defs": {
+    "AuditFindingV12": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "PROVENANCE",
+            "TIMELINE",
+            "EVIDENCE",
+            "KNOWLEDGE_BOUNDARY",
+            "PLAYABILITY"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "BLOCKER",
+            "WARNING",
+            "INFO"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/FindingTargetV12"
+        },
+        "message": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Message",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "category",
+        "severity",
+        "target",
+        "message",
+        "sources"
+      ],
+      "title": "AuditFindingV12",
+      "type": "object"
+    },
+    "FindingTargetV12": {
+      "additionalProperties": false,
+      "properties": {
+        "collection": {
+          "enum": [
+            "introduction",
+            "settlement",
+            "characters",
+            "phases",
+            "knowledge",
+            "evidence",
+            "truth",
+            "mechanics.actions",
+            "mechanics.phase_budgets"
+          ],
+          "title": "Collection",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Id"
+        }
+      },
+      "required": [
+        "collection",
+        "id"
+      ],
+      "title": "FindingTargetV12",
+      "type": "object"
+    },
+    "SourceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        }
+      },
+      "required": [
+        "source_id"
+      ],
+      "title": "SourceReference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "script-audit/1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "summary": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Summary",
+      "type": "string"
+    },
+    "coverage": {
+      "items": {
+        "enum": [
+          "PROVENANCE",
+          "TIMELINE",
+          "EVIDENCE",
+          "KNOWLEDGE_BOUNDARY",
+          "PLAYABILITY"
+        ],
+        "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "title": "Coverage",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/AuditFindingV12"
+      },
+      "maxItems": 200,
+      "title": "Findings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "summary",
+    "coverage",
+    "findings"
+  ],
+  "title": "ManualAuditReportV12",
+  "type": "object"
+}

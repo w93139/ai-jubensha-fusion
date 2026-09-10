@@ -6,13 +6,17 @@ applyTo: 'frontend/**'
 
 ## 基础配置
 
-- **框架**: Next.js 15（Pages Router），React 19，TypeScript 严格模式
+- **框架**: Next.js 16（Pages Router），React 19，具体版本以package.json和锁文件为准
 - **状态管理**: Zustand 5
 - **UI**: Radix UI + shadcn/ui + Tailwind CSS v4
 - **图标**: Lucide React
 - **API 客户端**: openapi-typescript-codegen 自动生成（axios）
 - 修改完不用重启开发服务器，热更新会自动生效
 - 如果端口被占用，说明已有实例在运行，不必再次启动
+
+当前开发入口是 /play，旧/game及管理/回放说明不代表真人模式已完成。
+先读根AGENTS.md和docs/development/README.md；默认只做离线组件测试与tsc检查。
+不要自动运行generate-api或启动服务。npm lint/check 已使用 ESLint 9 flat config；默认组件检查覆盖 fusion-evidence-panel、source-bundle-panel 和 script-review-panel。
 
 ```bash
 npm run dev               # 开发服务器（端口 3001）
@@ -241,4 +245,4 @@ import type { User } from '@/types/auth';
 - `src/client/` 目录是自动生成的，**禁止手动编辑**
 - `next.config.ts` 从根目录 `.env` 加载环境变量并注入 `NEXT_PUBLIC_API_URL`
 - 图片远程模式允许 `localhost:8010` 和任意 `https` 域名
-- ESLint 在构建时已禁用（`eslint.ignoreDuringBuilds: true`）
+- 构建和检查行为以当前next.config.ts/package.json为准，不沿用旧版Next配置假设。

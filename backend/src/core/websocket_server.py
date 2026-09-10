@@ -6,6 +6,10 @@ from datetime import datetime
 from abc import ABC, abstractmethod
 import os
 
+from src.core.environment import load_project_environment
+
+load_project_environment()
+
 from sqlalchemy.orm import Session
 # 显式导入以避免依赖包级 __init__ 导出（已精简以规避循环导入）
 from src.core.game_engine import GameEngine
@@ -17,7 +21,6 @@ from src.db.session import get_db_session, db_manager
 from src.db.models.game_session import GameSession as DBGameSession, GameSessionStatus
 from src.db.models.user import User
 from src.core.game_tts_manager import GameTTSManager
-from dotenv import load_dotenv
 import uuid
 
 # 配置日志
@@ -31,8 +34,6 @@ try:
     import websockets
 except ImportError:
     websockets = None
-
-load_dotenv()
 
 def serialize_object(obj):
     """序列化对象，处理datetime等不可序列化的对象"""
@@ -96,8 +97,11 @@ class GameSession:
         self.tts_manager: GameTTSManager|None = None
         self._initialize_tts_manager()
     
-    def _initialize_tts_manager(self):
+    def _initialize_tts_manager(self) -> None:
         """初始化TTS管理器"""
+        if os.getenv("ENABLE_MEDIA_FEATURES", "false").lower() != "true":
+            self.tts_manager = None
+            return
         try:
             # 从环境变量获取TTS配置
             api_key = os.getenv("TTS_API_KEY")

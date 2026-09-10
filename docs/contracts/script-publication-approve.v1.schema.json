@@ -1,0 +1,90 @@
+{
+  "$defs": {
+    "ModelFindingDisposition": {
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "exclusiveMinimum": 0,
+          "title": "Job Id",
+          "type": "integer"
+        },
+        "finding_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Finding Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "ACKNOWLEDGED",
+            "DISMISSED"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "finding_id",
+        "status",
+        "note"
+      ],
+      "title": "ModelFindingDisposition",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "expected_package_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Package Hash",
+      "type": "string"
+    },
+    "bundle_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Bundle Hash",
+      "type": "string"
+    },
+    "expected_basis_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Expected Basis Hash",
+      "type": "string"
+    },
+    "model_dispositions": {
+      "items": {
+        "$ref": "#/$defs/ModelFindingDisposition"
+      },
+      "maxItems": 1000,
+      "title": "Model Dispositions",
+      "type": "array"
+    },
+    "note": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Note",
+      "type": "string"
+    }
+  },
+  "required": [
+    "idempotency_key",
+    "expected_package_hash",
+    "bundle_hash",
+    "expected_basis_hash",
+    "model_dispositions",
+    "note"
+  ],
+  "title": "ApprovePublicationRequest",
+  "type": "object"
+}

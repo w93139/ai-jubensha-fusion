@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "GuidedHintTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "topic_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Topic Id",
+          "type": "string"
+        },
+        "level": {
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "title": "Level",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "topic_id",
+        "level"
+      ],
+      "title": "GuidedHintTarget",
+      "type": "object"
+    },
+    "PackageInvestigationTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Action Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action_id"
+      ],
+      "title": "PackageInvestigationTarget",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "package-guided-command/1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "expected_revision": {
+      "minimum": 0,
+      "title": "Expected Revision",
+      "type": "integer"
+    },
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "action": {
+      "enum": [
+        "INVESTIGATE",
+        "FINISH_INVESTIGATION",
+        "PRESENT_REQUIRED",
+        "REQUEST_HINT"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "payload": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PackageInvestigationTarget"
+        },
+        {
+          "$ref": "#/$defs/GuidedHintTarget"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Payload"
+    }
+  },
+  "required": [
+    "schema_version",
+    "expected_revision",
+    "idempotency_key",
+    "action"
+  ],
+  "title": "GuidedPlayRequest",
+  "type": "object"
+}

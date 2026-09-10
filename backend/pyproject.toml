@@ -25,15 +25,17 @@ dependencies = [
     "alembic>=1.16.4",
     "psycopg[binary]>=3.2.3",
     "redis>=5.2.0",
-    "passlib[bcrypt]>=1.7.4",
+    "pwdlib[argon2,bcrypt]>=0.3.0",
     "python-jose[cryptography]>=3.5.0",
     "email-validator>=2.2.0",
     "jsonschema>=4.25.0",
     "gradio-client>=1.11.1",
+    "pillow>=12,<13",
 ]
 
 [dependency-groups]
 dev = [
+    "debugpy>=1.8.0",
     "pyright>=1.1.300",
     "pytest>=8.4.1",
 ]

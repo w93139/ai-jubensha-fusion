@@ -1,0 +1,166 @@
+{
+  "$defs": {
+    "CompileBlocker": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "SOURCE_GAP",
+            "UNSUPPORTED_MECHANIC",
+            "CONTRADICTION"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Message",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "sources"
+      ],
+      "title": "CompileBlocker",
+      "type": "object"
+    },
+    "CompilerConfirmedSlot": {
+      "additionalProperties": false,
+      "properties": {
+        "collection": {
+          "enum": [
+            "introduction",
+            "knowledge",
+            "evidence",
+            "truth",
+            "settlement.instructions"
+          ],
+          "title": "Collection",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Id"
+        }
+      },
+      "required": [
+        "collection",
+        "id"
+      ],
+      "title": "CompilerConfirmedSlot",
+      "type": "object"
+    },
+    "SourceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        }
+      },
+      "required": [
+        "source_id"
+      ],
+      "title": "SourceReference",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "compiler-text-confirmation/1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "CANDIDATE",
+        "BLOCKED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "slots": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/CompilerConfirmedSlot"
+          },
+          "maxItems": 11002,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Slots"
+    },
+    "blockers": {
+      "items": {
+        "$ref": "#/$defs/CompileBlocker"
+      },
+      "maxItems": 100,
+      "title": "Blockers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "status",
+    "slots",
+    "blockers"
+  ],
+  "title": "CompilerTextConfirmation",
+  "type": "object"
+}

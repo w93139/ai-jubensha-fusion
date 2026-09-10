@@ -6,6 +6,7 @@ from src.core.auth_middleware import get_current_active_user_from_request
 from src.db.models.script_model import ScriptStatus
 from src.db.session import get_db_session
 from src.fusion.service import FusionGameError, FusionGameService
+from src.fusion.websocket import fusion_connections
 from src.schemas.fusion_game import CreateFusionSessionRequest, FusionActionRequest, SelectCharacterRequest
 
 
@@ -57,15 +58,21 @@ def select_character(session_id: str, body: SelectCharacterRequest, request: Req
 @router.post("/sessions/{session_id}/actions")
 async def perform_action(session_id: str, body: FusionActionRequest, request: Request, games: FusionGameService = Depends(service)):
     user = get_current_active_user_from_request(request)
+    before_event_id = invoke(lambda: games.get_state(session_id, user.id))["last_event_id"]
     state = invoke(lambda: games.perform_action(session_id, user.id, body.type, body.payload, body.idempotency_key))
-    if body.type == "ask_question":
-        await games.answer_question(
-            session_id, user.id, int(body.payload.get("target_character_id", 0)), str(body.payload.get("content", ""))
-        )
-        state = games.get_state(session_id, user.id)
-    elif body.type == "advance_phase" and state["phase"] in ("INTRODUCTION", "DISCUSSION"):
-        await games.run_ai_phase(session_id, user.id)
-        state = games.get_state(session_id, user.id)
+    try:
+        if body.type == "ask_question":
+            await games.answer_question(session_id, user.id, body.idempotency_key)
+            state = games.get_state(session_id, user.id)
+        elif body.type == "advance_phase" and state["phase"] in ("INTRODUCTION", "DISCUSSION"):
+            await games.run_ai_phase(session_id, user.id, body.idempotency_key)
+            state = games.get_state(session_id, user.id)
+    except (FusionGameError, ValueError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    await fusion_connections.broadcast(session_id, {
+        "type": "STATE_UPDATED", "session_id": session_id,
+        "events": games.get_events(session_id, user.id, before_event_id), "payload": state,
+    })
     return response(state)
 
 

@@ -7,6 +7,7 @@ from sqlalchemy import desc, or_
 
 from ...schemas.script_info import ScriptInfo, ScriptStatus
 from ...schemas.base import PaginatedResponse
+from ...core.script_authoring_policy import reject_legacy_publication
 
 if TYPE_CHECKING:
     from ...schemas.script import Script, ScriptCharacter, ScriptEvidence, ScriptLocation, BackgroundStory
@@ -28,6 +29,7 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
     
     def create_script(self, script_data: ScriptInfo) -> ScriptInfo:
         """创建新剧本"""
+        reject_legacy_publication(script_data.model_dump())
         # 转换为数据库模型
         db_script = ScriptDBModel(
             title=script_data.title,
@@ -53,6 +55,7 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
     def create_complete_script(self, script: Script) -> Script:
         """创建完整剧本（包含所有关联数据）"""
         from ...schemas.script import Script
+        reject_legacy_publication(script.info.model_dump())
         
         # 创建主剧本
         db_data = script.info.to_db_dict()
@@ -152,7 +155,8 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
                         status: Optional[ScriptStatus] = None,
                         author: Optional[str] = None,
                         page: int = 1,
-                        size: int = 20) -> PaginatedResponse[ScriptInfo]:
+                        size: int = 20,
+                        public_only: bool = False) -> PaginatedResponse[ScriptInfo]:
         """获取剧本列表（分页）"""
         query = self.db.query(ScriptDBModel)
         
@@ -162,6 +166,11 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
             query = query.filter(ScriptDBModel.status == status.value)
         if author:
             query = query.filter(ScriptDBModel.author == author)
+        if public_only:
+            query = query.filter(
+                ScriptDBModel.status == ScriptStatus.PUBLISHED.value,
+                ScriptDBModel.is_public.is_(True),
+            )
         
         # 计算总数
         total = query.count()
@@ -183,6 +192,8 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
     def search_scripts(self, keyword: str, page: int = 1, size: int = 20) -> PaginatedResponse[ScriptInfo]:
         """搜索剧本"""
         query = self.db.query(ScriptDBModel).filter(
+            ScriptDBModel.status == ScriptStatus.PUBLISHED.value,
+            ScriptDBModel.is_public.is_(True),
             or_(
                 ScriptDBModel.title.ilike(f"%{keyword}%"),
                 ScriptDBModel.description.ilike(f"%{keyword}%"),
@@ -205,6 +216,7 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
     
     def update_script_info(self, script_id: int, script_data: ScriptInfo) -> Optional[ScriptInfo]:
         """更新剧本基本信息"""
+        reject_legacy_publication(script_data.model_dump(exclude_unset=True))
         db_script = self.db.query(ScriptDBModel).filter(ScriptDBModel.id == script_id).first()
         if not db_script:
             return None
@@ -220,6 +232,7 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
     
     def update_complete_script(self, script_id: int, script: Script) -> Optional[Script]:
         """更新完整剧本"""
+        reject_legacy_publication(script.info.model_dump())
         db_script = self.db.query(ScriptDBModel).filter(ScriptDBModel.id == script_id).first()
         if not db_script:
             return None
@@ -294,11 +307,13 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
     
     def update_script_status(self, script_id: int, status: ScriptStatus) -> bool:
         """更新剧本状态"""
+        reject_legacy_publication({"status": status})
         db_script = self.db.query(ScriptDBModel).filter(ScriptDBModel.id == script_id).first()
         if not db_script:
             return False
         
         setattr(db_script, 'status', status.value)
+        db_script.is_public = False
         return True
     
     def update_script_cover_image_url(self, script_id: int, cover_image_url: str) -> bool:
@@ -483,6 +498,7 @@ class ScriptRepository(BaseRepository[ScriptDBModel]):
         
         update_data 的键为数据库列名（如 duration_minutes、difficulty）
         """
+        reject_legacy_publication(update_data)
         db_script = self.db.query(ScriptDBModel).filter(ScriptDBModel.id == script_id).first()
         if not db_script:
             return None

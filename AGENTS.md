@@ -1,196 +1,244 @@
-# AI剧本杀 — Agent Guide
+# 人生海海 — 项目开发指令
 
-AI-driven murder mystery game. All roles are played by AI. Full game flow: background → intro → investigation → discussion → voting → reveal.
+2026-09-10 实时转写已更新本机：千问PCM分段传输、临时句覆盖、终稿校对追加与手动发送；一次性WS票据、同一时长账本、故障部分回执取回及长存档轻量进度校验。后端2858、前端389、预检16、类型/lint/构建和独立复审通过。3次合成真实服务共21.146375秒/估算¥0.00697830，实际页面2条模拟PCM链通过，390px无横溢；停止后收尾样本由23.58秒降至另一录音0.28秒，不承诺普遍延迟。Ego原生点击触发短暂后台而正常取消，DOM click测试通过；实体手机麦克风与软键盘仍待测。构建c7VP6P8VJ9zQNdrLtFYFt，912事件/25局/27开场及全7表既有行保持，PRD0.23。后端私有快照同步结果见仓库外realtime-asr-20260910/final-report.json。停M3等待用户实机测试；下一轮按反馈修复复验，建议极高思考强度；不加横屏/TTS、不进M4。详见[实时语音交付](docs/development/M3_REALTIME_SPEECH_INPUT.md)。
 
-**Tech stack**: FastAPI (Python 3.13+) + Next.js 15 (TypeScript), PostgreSQL, WebSocket, OpenAI-compatible LLMs, TTS, image generation.
+2026-09-10 千问语音输入已接入并更新本机：复用现有百炼Key，固定qwen-audio-3.0-asr-flash，公开角色名字作热词；保留校对、追加原草稿和手动发送，单次请求/时长限额及旧回执保持。真实合成录音3例通过，约21.15秒/估算¥0.00465220；后端2831、前端380、预检16、类型/lint/构建、独立复核及3条失败到结算恢复链通过。桌面/390px已显示千问及开始录音，模拟拒绝后草稿和文字发送可用；自动化AudioContext未完成启动，浏览器实录链及实体手机仍待用户测试。构建98geZbhw_tUeYFyJKKWrl，原912事件、25局及全7表既有行保持；PRD0.22。私有后端快照m3-20260910.5 / 327b53d已推送核验，401后端导出文件与测试源一致。停在M3等待实机反馈，建议高思考强度；不增加横屏/TTS或进入M4。详见[千问语音输入](docs/development/M3_QWEN_SPEECH_INPUT.md)。
 
----
+2026-09-10 最新总结展示反馈已交付：短条目全部列在同一格，取消「你的表现」数字/前后翻阅与内部滚动；保留正文、图片和逐项需/可选择讲述，通用提醒一次。前端352、后端2807、类型/lint/预检16/构建与独立复核通过；实际桌面/390px DOM全部5项、无翻阅控件，固定栏几何样本不作为本轮验收。原911事件、25存档及全7表保持，调用/费用0。构建6dOKVL_if1w0tdRvR9e6o，PRD0.21；私有文档快照m3-20260910.4 / 67bc07d已推送核验；导出399个后端文件与测试源一致。停M3等待测试，下一轮按反馈修复复验，建议高思考强度；未进入M4/ASR/横屏。详见[单卡总结](docs/development/M3_PERFORMANCE_SUMMARY.md)及本机performance-list-20260910/final-report.json。下文旧翻阅设计已被本次纠正。
 
-## Quick Start Commands
+2026-09-10 阅读总结反馈已交付：「你的表现」合并标题/总说明，按角色3–7个编号切换单条内容，去掉此组重复收藏，保留每项转述要求与图片。前端507及最终相关210、后端2807、类型/lint/预检16/隔离构建与独立审查通过；两包五角色10组原文/顺序保持。实际1470/390px数字、前后、键盘和刷新验证通过；截图超时用DOM几何留证。911事件、25存档及全7表保持，调用/费用0。仅更新前端构建yyhiJLO4PIOHfGyFhm9wQ。PRD0.20，后端文档私有快照m3-20260910.3 / 4b9e2fb已推送并核验，导出副本2807项通过。停在M3等待用户测试，下一轮按反馈修复复验，建议高思考强度；未增加横屏/ASR或进入M4。见[第一幕总结翻阅](docs/development/M3_PERFORMANCE_SUMMARY.md)及本机performance-summary-20260910/final-report.json。下文为历史记录。
 
-### Backend
-```bash
-cd backend
-uv sync                   # install dependencies
-uv run python main.py     # start dev server (port 8010)
-uv run pytest             # run all tests
-uv run pytest -m api      # run by marker (api / unit / integration / slow)
-uv run pytest tests/test_script_api.py  # single file
+2026-09-10 调查页面反馈已交付：返回首页常驻顶部左侧；固定记录栏同步给正文和输入让出376px，窄屏用弹窗；新增上一轮只读回看与回到当前进度；收藏两/三列索引、144px独立滚动、单条详情和本地搜索。409提示统一刷新进度并直接给入口，未确认公开发言在主页面沿原请求核对后再调查。前端502、后端2807、类型/lint/预检16/隔离构建及两项独立审查通过；实际1470/390px侧栏、首页、回看、收藏增查删及刷新回焦通过。截图接口超时，以DOM几何和快照留证。911旧事件、25存档及7表全部保持，调用/费用0，仅替换前端构建gWitblv7RH48f4T6fb194，后端未重启。PRD0.19，后端文档私有快照m3-20260910.2 / e426c34已推送并核验，导出2807项通过。停在M3等待用户测试，下一轮按反馈复验、建议高思考强度；未增加横屏功能或进入M4。见[调查页面修复](docs/development/M3_INVESTIGATION_UI.md)及本机investigation-ui-20260910/final-report.json。下文为历史记录。
+
+2026-09-10 回答质量修复交付：新增仅新问题采用的逐段条件引用1.1，修复S漏引、H私聊原卡复制诱因及同批H/Y/J引用或归属表达。最后一批7条真实回答独立来源复核全部通过，未用固定短答替代；6条失败到结算恢复的离线整链通过，24份旧局投影一致。后端2807、前端相关201、类型检查、预检16通过；本机服务已更新，首页/旧局恢复/390px选角入口通过，产品前端构建仍为Ete94GO-cc256CfNqep-T。两批14次调用、估算¥0.05994168，历史失败与旧请求原样保留。PRD0.18，后端私有快照m3-20260910.1 / d982e90已推送并核验，导出副本2807项通过。手机仅竖屏范围，不增加横屏功能。按用户要求停在M3等待测试，不自动继续ASR/M4；真实语音与实体手机键盘仍待验。详见[质量修复交付](docs/development/M3_SEMANTIC_FIX.md)。本机semantic-fix-20260910/final-report.json记录最终证据。下文为历史检查点。
+
+2026-09-10 M3语义专项复验：当前v6目录/路由在隔离数据库新局实际7次调用，5条归属与引用通过、S一条引用不完整仍复现、H私聊原卡复制仍被正确拦截。H显式短答不增费且刷新一致，29调查到终局；新6条禁网公开/私聊失败链均到五席封卷结算及恢复。后端2773、前端相关201、类型、预检16及独立复核通过；本次估算¥0.03511416。原库所有行及冻结代码/来源保持，未修改产品源码或部署/同步新后端版本。仍M3专项收尾，下一轮针对S逐段引用和H合法转述做小修复与新请求复验；真实ASR/实体手机待验，M4未进，建议语义/权限极高。见[专项复验报告](docs/development/M3_SEMANTIC_REVALIDATION.md)，私有semantic-revalidation-20260910/final-report.json。后续旧记录按日期理解，不将本轮5/7外推通用准确率。
+
+2026-09-09 对话逻辑最新交付：公开回应自动取当前阶段最新本人发言，删除历史下拉；待定请求仍原样核对。公私有限议题支持输入匹配候选、明确问法后确认；改字/切对象/阶段/通话清选择；独立身份歧义澄清，有限越权/现实危险请求在预占前拒绝。前端496、后端及导出各2773、预检16、类型/lint/构建/独立复核通过。实际桌面/390px最新目标及刷新、澄清、候选确认/重置、私聊输入与结束验证；895旧事件及全部旧行保持，独立QA新增1开场1局7事件，真实回应1次/¥0.01202656。构建Ete94GO-cc256CfNqep-T，PRD0.17；私有后端/文档GitHub m3-20260909.15 / 60ad304已核验（不含前端）。匹配仍是有限题目字词推荐，不是通用语义审核、不自动选角、不替换旧绑定。M3专项收尾，M4未进；下一轮真实ASR/实体手机/既有语义限制复验并交付专项记录，建议常规高、语义权限极高。详见[对话逻辑修正](docs/development/M3_DIALOGUE_CORRECTION.md)，本机dialogue-correction-20260909/final-report.json。
+
+2026-09-09 发言模式最新交付：取消逐行播放，授权台词全文/已授予回忆即时可用；底部固定公开发言/单独对话切换，草稿隔离保留，角色横排点选。私聊沿用双方权限和有限议题；修复结局回看入口与只读对象切换。前端490/末次211、后端及导出各2743、预检16、类型/lint/构建/独立复核通过。真实1470/390px切模式、草稿、角色卡、回焦和已有私聊验证，895旧事件及全部旧行保持，新调用/费用0。构建CWksz58TLkbMVJhdGxS47，PRD0.16；私有后端/文档GitHub m3-20260909.14 / eab302f已核验（不含前端）。仍停M3反馈复验与专项收尾，真实ASR/实体手机/既有模型语义限制保留，M4未进。下一轮交付专项验收记录；建议常规高、语义权限极高。详见[发言模式交付](docs/development/M3_COMPOSER_MODES.md)，本机composer-modes-20260909/final-report.json。
+
+2026-09-09 首页流程最新交付：主页/旧剧本中心/旧大厅统一为最近一局、开始新游戏和我的记录；账号只读分页库仅返回安全元数据，继续原play不建新局，结束回顾。游戏/开场返回首页、手机关闭/回焦及个人信息入口已验证。前端483及末次208/14、后端/导出各2743、预检16、类型/lint/构建/独立复核通过。桌面/390px新局开始→推进→首页→继续→刷新和旧结局恢复、12→22分页无重复通过；890旧事件与全部旧行保持，独立QA新增1开场1局2规则事件，新调用/费用0。构建xFPlU4eYKJhWylz-YxrrT，PRD0.15；私有后端/文档GitHub m3-20260909.13 / dbc295d已核验（不含前端）。入口http://127.0.0.1:13032/。停在M3首页反馈与专项收尾，ASR/实体手机/语义限制保留，M4未进；下一轮收专项再角色适配，建议常规高、角色语义权限极高。详见[首页流程](docs/development/M3_HOME_FLOW.md)，本机home-flow-20260909/final-report.json。
+
+2026-09-09 结局答疑最新交付：玩家隐藏编辑条件/衔接行与主持内部约束，保留紧邻正文；结算后顶部为结局答疑，三个已审有源问题点选解释。无自由输入/生成入口，不接无关和敏感请求，不声称通用语义审核已实现。前端470、后端/导出各2718、预检16、类型/lint/构建与独立复核通过；误删整段问题已修成逐行，实际两包64材料正文0差异。旧局桌面/390px切题、关闭回焦及未结束边界验证，890旧事件和全部旧行保持，新调用/费用0。构建ILP4iVU4FnKX6-vprKJVK，PRD0.14；私有后端文档GitHub m3-20260909.12 / 3b31fd3已核验。停在M3反馈复验/专项收尾，真实ASR、实体手机和既有语义限制保留；M4未进。建议常规高、权限语义极高。详见[结局答疑](docs/development/M3_POSTGAME_QA.md)，本机postgame-qa-20260909/final-report.json。
+
+2026-09-09 结局收尾最新交付：本人及共同结局/得分先展示，真相复盘随后，其他角色明确展开；结尾指定宣传语和网址隐藏，空结局标题消除。所有玩家入口“本轮核心目标”与阅读15–25/调查20–35/终局10–20分钟已实际核对，结算后目标修正并移除过期状态。前端467、后端/导出各2711、预检16、类型/lint/隔离构建及独立复核通过；真实旧结局桌面/390px与三类阶段验证，890旧事件及全部旧行保持，新调用/费用0。构建J3uuaytTP9goneArIZdCW，PRD0.13；私有后端文档GitHub m3-20260909.11 / 1fba457核验。停在M3本轮反馈复验与专项收尾，ASR/实体手机/语义限制保留，M4未进。建议常规UI高、权限/语义极高。详见[结局收尾](docs/development/M3_ENDING_PRESENTATION.md)，本机 ending-order-20260909/final-report.json。
+
+2026-09-09 验收状态更新：**用户表示 M3 当前界面与文字阶段验收基本完成，现进入 M3 收尾。** 这不代表真实豆包 ASR、实体手机软键盘、所有模型答复语义或正式发布已经验收。本轮继续调整集中交流：议题标签、角色选项、问题卡直接横排展示；“本轮指引”改为“本轮核心目标”，参考时间以小字说明，不形成倒计时或推进约束。本轮调整已完成，464项前端回归、类型/lint、后端2711项与预检16项通过；实际桌面/390px直接点击、方向键选择、切题清理及三类参考时间验证通过，未发送问题或产生费用。完整开发流程、后续交付和退出标准见[验收状态与后续路线](docs/development/M3_ACCEPTANCE_ROADMAP.md)。下列日期记录保留为历史检查点，当前状态以本段及第 3、5 节为准。
+
+2026-09-09 verification: frontend 464, backend/export 2711 each, preflight 16, typecheck/lint/build and independent review passed. Actual 1470px/390px radio clicks, keyboard selection, dependent reset and phase time labels verified. All 889 events and existing rows unchanged; new calls/cost 0. Build gVVB7eiF2ZRyfWdpgg7dl; PRD 0.12; private backend/docs GitHub m3-20260909.10 / 1c5dd0e verified. Next: M3专项收尾 and M4 role adaptation planning; M4 not started. Suggested reasoning: high for UI, extra-high for role/semantic/permissions work. Report: direct-choices-20260909/final-report.json.
+
+
+2026-09-09 线索呈现最新交付：玩家隐藏修订版/新增/非原卡及补充标题内部编号，150项扫描仅两项编辑头改变；55图全部核对和实际授权加载验证，15张按bytes指纹默认正向，缩略/放大同向，390px与关闭回焦通过。重复主持由同级key冲突造成，命名空间修复后React五阶段及真实四阶段/刷新均只有1个。前端463+最后1、后端/导出各2711、预检16、类型/lint/构建及独立复核通过。构建ZtN1YgHhjr_hiy7yu9f2O，仅重启前端；873旧事件及全部旧行保持，独立验收局新增结束调查2/推进3，新增调用与费用0。PRD0.11，私有后端文档GitHub m3-20260909.9 / 05c52b2已核验。停在M3用户验收，ASR/实体手机键盘与已有模型语义限制保留，M4未进。下一轮按具体卡片和阶段反馈修复复验，建议开发思考强度高；见[线索呈现修复](docs/development/M3_CLUE_PRESENTATION.md)。下文为历史检查点。
+
+
+2026-09-09 入口与阶段复盘最新交付：选故事/阅读开场/一次开始直达创建或恢复；玩家隐藏M3版本及重复试玩入口。手记同色，目标与故事去重。上方推进先选复盘或继续，复盘/关闭不推进；左侧按阶段整理有源关键摘记、排除规则前言/未播完台词，完整资料可读。PRD0.10；前端455及最后6、后端/导出各2711、预检16、类型/lint/构建与独立复核通过。桌面/390px入局恢复、弹窗/回焦、原阶段摘要验证；构建kfoddVyyEsxnu3KoNWp5e，只重启前端。863旧事件及全部旧行保留，新验收开场/局各1、新推进与规则台词2事件，新调用/费用0。私有后端文档GitHub m3-20260909.8 / 5d48732已核验。停在M3用户验收；ASR和实体手机键盘仍待验，M4未进。下一轮按反馈修复复验，建议开发思考强度高；详见[入口与复盘](docs/development/M3_ENTRY_RECAP.md)。下文为历史检查点。
+
+2026-09-09 紧凑界面最新交付：顶栏两行/更多工具与折叠指引，768px起56px悬停记录列（点击固定、Esc关闭），已获线索叠放横向卡组，答卷横向优先网格。实际桌面顶栏276→127px、手机119px、800横屏127px；鼠标/焦点/弹窗层级/翻卡/图片/选择上限通过。后端及文档导出各2711、前端443与最终25项、类型/lint/预检16/构建和独立复核通过。构建pt5fxFdKcIWTe1pPmsStV，仅重启前端；全部旧861事件及7表保持，新增调用/费用0。PRD0.9，GitHub m3-20260909.7 / 49f9795已核验。M3待用户验收，实际ASR/实体手机键盘未测；下一轮按体验反馈修复复验，建议开发思考强度高，M4未开始。详见[紧凑界面](docs/development/M3_COMPACT_PLAY.md)。下文为历史检查点。
+
+2026-09-09 每轮工作区最新交付：顶栏右上推进、醒目主持提示、一次多选地点后其余角色按规则自动安排余点、左侧每轮记录与可选复盘、底部返回主界面及统一请其他角色提交已接入。选址轮换无需模型，资料仍由吉叔按原规则公开；未知封卷先核对再明确确认新请求。PRD0.8；后端2711、前端主体438/矮屏定向8、类型/lint/预检16及独立复核通过，两绑定58调查与16旧局回放通过。本机构建ncWOn5PrZIYCdf4vysGmD。自动选址和复盘新增调用/费用0；停在M3用户验收，真实ASR与实体手机键盘待验证，M4未进。下一轮按本次清单修复反馈再验收，建议开发极高。详见[每轮调查与工作区](docs/development/M3_ROUND_WORKSPACE.md)。下文历史检查点以本段为准。 后端白名单快照已同步并核验私有 GitHub `m3-20260909.6` / `f82af82`（429文件）；导出副本2711项通过。旧838事件及全部既有行逐项保持，本轮只追加两个独立界面验收局和13事件，新增付费调用0。
+
+2026-09-09 单人流程最新交付：开场/游戏共用操作稿，五阶段目标、八个有限议题与角色初问/两项追问已接入；自由自述只保存，公私聊共享次数，失败可明确选有源短答。实际姓名遗漏、親历归属、时间地点与期待来源问题已定向修复复验；读报误拦采用严格文献例外，旧回答和费用保留。PRD0.7；后端及私有导出各2695、前端423，类型/lint/预检16/构建及独立复核通过。新流程29调查、五席封卷结算和重读通过，末次两条正常模型发言触发回忆。本轮41次新调用/保守¥0.27132872；构建G_Le_WEzwJGsUR2C8BL46，GitHub m3-20260909.5 / 61406f0已核验。旧行全部保留，入口18032。停在M3文字用户验收：私聊原卡拦截后的短答路径及一项引用精度谨慎保留，ASR仍待真实配置验证，M4未进。下一轮按八项清单反馈修复复验，建议极高；详见[单人流程交付](docs/development/M3_SINGLE_PLAYER_CONTRACT.md)。下文“当前/待审建议”均为历史检查点，以本段为准。
+
+2026-09-09 路线复核最新交付：用户取消玩家端原始排版与逐段/逐条提问。共用PlayText对照原文已移除；完整玩法不再新建旧材料原文问答，保留集中自然交流、历史答复及已知原请求核对，未知pending仅提示刷新。PRD0.4与[单人路线审查](backend/docs/M3_PRODUCT_ROUTE_REVIEW.md)明确：一真人四AI目标未变，体验混入开发工具；需单人操作稿与阶段议题/披露/卡住契约，新契约目前只是建议，未改商业真相/规则。前端397、后端/导出各2642、预检16、独立186及类型/lint/构建通过；真DOM验证删入口、集中交流、回忆回位和图片加载。构建 `WG_oK87fUx_E3LYBN8dN7`，GitHub `m3-20260909.3` / `f716d63`已核验，后端未重启、7表全部摘要未变、新调用/费用0。首次构建误用运行目录的临时静态资源不一致已用隔离构建替换修复并留证。当前M3玩法收口/单人适配复核，不能将删除按钮当议题约束完成或完整体验通过。下一步建议第一调查环节有源交互稿与可玩样板，建议极高；M4/正式发布未进。详见[本轮结果](docs/development/M3_PRODUCT_ROUTE_REVIEW.md)。下文保留历史检查点。
+
+2026-09-09 分步交互最新交付：阅读/调查/讨论/私聊/终局分视图与回看；真人直接选址，规则呈现已获必须角色台词；终局同排一键请四席独立投票；电话纯文字气泡与单次回复；顶部有源三级主持提示（17主题/51档内容），第三档仅当前问题明确揭晓。新建议1.2严格仅合法action_id，旧1.1事件原样回放，真实新请求成功。后端及私有导出各2642、前端393、预检16/类型/lint/构建及独立复核通过；离线两绑定10阶段/102提示/58调查/10规则呈现通过，旧505行含479事件逐行保留。新真实5次、保守¥0.05824472，保留一次私聊原卡复制拦截与两次旧建议失败，不能标全部语义通过。构建 `fJevlYSvlJsx9hw1gd39Q`，GitHub `m3-20260909.2` / `309c729`已核验。入口18032；停在M3用户验收，真实ASR仍待配置、电话已改仅文字；未进M4/正式发布。详见 [分步流程交付](docs/development/M3_GUIDED_FLOW.md)。下一轮M3修反馈复验，建议极高。下文历史检查点与当前不一致处以本段为准。
+
+2026-09-08 图片线索与内容修复交付：开场地图/等待警方情境补齐，24张遗漏卡面授权追加；180材料同类扫描、28条材料经原图修正，截图“了、”恢复7。独立“我收藏的线索”及Dock/短屏避让完成。前端372、后端及私有导出各2613、预检16、类型/lint/webpack及独立复核通过，真实页面图片/收藏/刷新/取消/800短屏与390px交互通过；截图接口超时，使用DOM几何证据。原9开场/7试玩/443事件及全部旧行保持，仅追加新候选/导入/本机开发release；新模型/ASR0、费用¥0。构建`KoGwlXTQzmdgCcl2S3qEV`，后端GitHub `m3-20260908.7` / `453c8b1`已核验。停在M3用户验证，不进入M4/正式发布；原模型语义与真实ASR待验保留。详见[线索与有源修复](docs/development/M3_CLUE_REPAIR.md)。下一轮M3按反馈修复复验，建议极高。下文保留历史检查点。
+
+2026-09-08 最新开场核查/入口交付：开场模块合并吸附顶部，右侧“开始游戏”含轻微交互动效与减少动态支持；故事说明收起、任务/回忆原位查阅。前端353、后端2589、类型/lint/webpack/预检16通过，独立UI复核无阻塞；桌面/390px真实DOM交互与进入既有局验证，7表及443事件与本轮更新前一致、真实调用0。构建 `Rw4BlGhNNvBv6Kkaknzx-`，本机入口不变。来源审查发现：开场7公共+14本人知识未返回后期私密材料，但有编辑规则/五封面公开安排；等待警方情境段与地图原图缺失，开场内容完整性未通过。未改冻结包/后端，后端GitHub仍`.6`。详见[开场核查与顶部操作栏](docs/development/M3_OPENING_PREVIEW.md)。下一轮M3依据有源缺项形成新候选、开场图片授权并复验，再交用户审核；建议极高。下文为历史检查点。
+
+2026-09-08 最新顶部导航交付：合并剧本信息/当前阶段和资料入口为顶部吸附栏，故事说明按需展开；任务/回忆/手记原地查阅，短屏输入内部滚动、错误显示在展开输入内并保留草稿。前端352、后端2589、类型/lint/webpack/预检16通过，独立复核无阻塞；桌面/390px DOM交互通过，真实手机软键盘及快速横竖屏切换仍待人工检查，截图接口超时。最终本机构建 `yzvGH-mLRYX01XQS3jn5J`，入口 http://127.0.0.1:18032，7表及441事件摘要未变、真实模型/ASR调用0。后端PRD 0.2同步私有GitHub `m3-20260908.6` / `48cb179`，412文件、远端main/tag已核验；该快照不含前端。本轮十项用户标准与限制见[顶部导航与验收](docs/development/M3_TOP_NAVIGATION.md)。停在M3用户验证，既有内容失败和真实ASR待验保持；下一轮按反馈修复复验，建议思考强度极高。
+
+此前文档版本已同步私有 GitHub：`m3-20260908.5` / `98685c3`，412 文件，远端 main/tag 已核验。仅 PRD 更新与历史稿归档，运行代码/配置未变、真实模型调用 0。详见 [PRD 登记交付](docs/development/PRD_PROGRESS_REGISTER.md)。下方 `.4` 等标签为对应历史功能交付版本。
+
+2026-09-08 PRD 与组件登记：按用户本轮要求，已找到并更新 [backend/PRD.MD](backend/PRD.MD) 为当前简版 PRD 草稿，原稿完整保留在 backend/docs/PRD_LEGACY_20260908.md。当前需求与进度以该 PRD 及各交付记录为准；更新文档不等于用户验收。LiteLLM 重新登记为“已评估、未安装/接入、采用待定”的后续运营候选，不是 M3 必做项；详见 [LiteLLM 评估](docs/development/LITELLM_INTEGRATION_ASSESSMENT.md)。文字 API 无需重配，ASR 仍缺独立凭据和启用开关。当前继续停在 M3 用户验收，真实 ASR 待配置后验证，M4/发布未通过。
+
+2026-09-08 豆包语音输入最新交付：用户新增ASR输入要求，覆盖公开发言、角色提问、电话私聊；显式录音/停止/校对/追加原草稿/手动发送，最长60秒；独立语音凭据、时长账本、幂等及场景隔离，TTS仍未加入。后端及GitHub导出各2589、前端352、预检16、类型/lint/webpack、独立复核通过；实际浏览器以合成音频和模拟ASR验证录音/取消/校对/互斥/390px，非真实服务验收。缺DOUBAO_ASR_API_KEY及启用开关，已请用户本地配置，真实语音尚不可用；新增真实调用0。入口http://127.0.0.1:18032，构建`R7PNEbD9hdfE2J00qrIb_`，全部存档表及441旧事件不变。私有GitHub后端`m3-20260908.4` / `c589600`已核验411文件。下一轮M3配置后受限真实识别、人名/权限/公开私聊验收；建议思考强度极高。详见[M3豆包语音输入](docs/development/M3_DOUBAO_SPEECH_INPUT.md)。
+
+2026-09-08 最新互动反馈交付：调查建议按真实阶段/共同目标解释；HTTP和本机验收服务增加实际AI轮次及新请求明确跑题前置拒绝，玩家隐藏Token/费用；回忆页区分触发提示与已授予卡并增加角色资料，收藏/提问44px按钮、局部参考及失效提示修复，错误滚动可见，私聊字数前后端统一。前端321、末次样式相关105、后端及GitHub导出各2545、预检16、类型/lint/webpack及独立复核通过；真实浏览器验证建议保存、两次跑题零调用、电脑/390px、原地收藏提问和5张旧回忆。最终构建`Lmc0jVijTRUdOZtTm7rNA`，入口http://127.0.0.1:18032，重启存档不变且439条旧事件保留；新增模型1次/保守¥0.01075440。后端私有GitHub版本`m3-20260908.3` / `441d82e`已推送核验，408文件。停在M3用户验收，明确跑题模式不等于任意语义分类，既有内容问题保留；未进M4或正式发布。详见[M3互动反馈](docs/development/M3_INTERACTION_FEEDBACK.md)，下轮先修反馈复验，建议思考强度极高。
+
+2026-09-08 最新反馈交付：修复开场预览遗漏的 Markdown 渲染及中文无空格编号断行；开场/试玩增加固定任务、回忆入口，试玩手记内联到同一工具栏，浮层关闭保持阅读位置；预览换号立即失效并拒绝旧异步响应。前端307、后端及代码导出副本各2503、同步工具27、预检16、类型/lint/webpack与独立复核通过。真实浏览器验证20px/700标题、原地查阅、390px发言避让及5条已解锁回忆。后端406文件已存入私有 `w93139/ai-jubensha-backend`，最新 `m3-20260908.2` / `610a3af`；首版保留，远端清单与提交/标签已核验。每个验证后的后端版本按下文同步约定更新 GitHub。入口仍为 http://127.0.0.1:18032；旧存档摘要一致，本轮新模型调用0/费用¥0。停在 M3 用户验收，先前语义限制保留，未进入M4或正式发布。详见 [本轮排版、随时查阅和备份](docs/development/M3_QUICK_REFERENCE_GITHUB.md)；建议后续思考强度极高。
+
+2026-09-08 用户反馈轮最新交付：已修阅读 Markdown/无标记标题与 OCR 硬折行、隐藏内部版本、正文末推进、底部发言追问、统一下拉、逐行可听台词和按账号/局/角色隔离的随身手记。前端 280、后端 2503、类型/lint/预检16/webpack、独立复核及真实浏览器操作通过；新增 2 次模型调用、保守 ¥0.02780208。本机入口仍为 http://127.0.0.1:18032，旧游戏保留，详细验证流程已更新。用户本轮明确最小 MVP 暂不加入 TTS，先逐行文字；当前 M3 仍固定唐小姐，M4 才做五角色。停在本轮 M3 用户验证点，收到反馈后修复复验，再进 M4；旧语义缺陷保持，runtime_ready=false。建议开发思考强度极高。详见 [M3 用户界面反馈](docs/development/M3_USER_FEEDBACK.md)。
+
+2026-09-08 最新交付：M3 已到可供用户完整验证的阶段，固定唐小姐与四 AI；本机入口 http://127.0.0.1:18032，持久启动器和详细验证流程已交付。最终真实整局 173 次、29 调查、五席封卷结算、15 个实际恢复点一致；新局页面完成真实公开/私聊、过期登录返回及重启恢复。后端 2503 项、最终前端 238 项、类型/预检/16 自测、webpack 构建通过；lint 无错误、1 条导航建议警告。内容仍有必讲背景遗漏、确定性升级、引用失准及电话重复，另保留 1 条页面原卡复制拦截，不能标全部语义通过。持续开发费用估算 ¥5.12414840，全部 M3 ¥5.26228880。此处停止自动开发，等待用户按流程验证与反馈；之后先修复 M3 反馈并复验，再进入 M4。建议开发思考强度极高（权限、事件、内容与费用需一起核对）；runtime_ready=false、未正式发布。详见 [M3 持续开发与完整验证](docs/development/M3_CONTINUOUS_VALIDATION.md)。
+
+下文保留历次检查点；其中旧的“最新”“尚未授权”“整局待做”等表述均为当时状态，以本段交付状态和持续开发记录为准。
+
+这是当前单真人剧本杀基座的工程约束，不是商业剧本内容或游戏角色提示词。
+技术事实以本仓库代码与锁文件为准，参考仓库和历史说明不是已实现能力的证据。
+
+## 当前目标与范围
+
+### 后端 GitHub 版本同步（2026-09-08 用户授权）
+
+- 用户已要求后端保存到 GitHub，后续版本迭代同步更新。目标为私有仓库 `w93139/ai-jubensha-backend`；保留现有公开 `origin` 与本地工作区，不将本轮工作直接推入公开仓库。
+- 每个完成必要验证的后端迭代，使用 `scripts/sync_backend_github.py` 创建代码快照、普通提交和新的 `m3-YYYYMMDD.N`（后续阶段相应前缀）标签，推送后核对远端提交及标签 SHA；将仓库链接和版本写入当轮交付记录。这是已授权动作，无需逐轮确认。
+- 默认只读检查后再 `--sync --push`。同步前确认目标仍为该私有仓库。不得强推、上传原仓库旧历史，或包含真实 `.env`、密钥、数据库、日志、商业剧本、OCR、游戏存档、模型产物；同步白名单及操作见 [后端备份说明](docs/development/BACKEND_GITHUB_BACKUP.md)。
+- 同步失败需报告准确状态并保留可重试的本地版本，不能称 GitHub 已更新。源码保存不等于已验证版本；不要建立未经检查的后台自动上传。
+
+- 一名真人独立与其余AI角色按原剧本完成整局，核心入口为 `/play`、`/api/fusion`。
+- MVP先做《孽岛疑云》；不处理《办公室谋杀案》正文，不改写现有商业剧本。
+- 核心体验包括角色隔离、按规则分享/解释、条件线索与分级提示，最终接入语音和打断。
+- 工程上先文字规则闭环再语音；不能将文字原型宣称为最终MVP。
+- 用户已于 2026-09-08 要求检查和整理 PRD；维护现有 backend/PRD.MD，保留历史稿，不另起重复产品方向。不更换现有 FastAPI/Next.js/PostgreSQL 基座，不加入 book-to-skill。
+- Fusion 角色对白默认使用火山方舟 `doubao-seed-character-260628`；阿里百炼
+  `qwen3.7-flash-2026-07-15` 是已适配的手动备用和未来主持/总结候选，不自动跨供应商回退。
+  单局首次模型动作冻结一家渠道；真实付费开关仍需单独开启。TTS建议CosyVoice v3-flash，与MiniMax Turbo试听对照。
+- 采用agent-blueprint的s02/s03/s04/s08/s11/s16/s17思想，不复制CLI、任意shell、共享全本记忆或整套agent团队。
+
+## 先读与开发顺序
+
+2026-09-08 最新授权：用户要求持续 M3 开发，允许中途费用消耗，到 M3 完整验证阶段再停下等用户验证。必要后续付费批次已在授权内，不再逐批确认；保留冻结输入、预算、账本和旧失败证据。交付可操作入口、验证方法与流程后等待用户验收。详见 [M3 持续开发任务](docs/development/M3_CONTINUOUS_VALIDATION.md)。下文“无新批次授权”为此前历史状态。
+
+2026-09-08 最新：用户确认此次测试金额并继续开发。已恢复新引用格式四例的现存真实执行并完成独立复核：4 次请求、35914 tokens、估算 ¥0.0459048（上限 ¥0.50），预占归零；本次续接新增真实调用 0。格式 4/4 通过，J/S 所测内容通过，H 有源前提通过但反问有效性有限；Y 的记忆断言依据不足，药物不确定性与未知短醒时间两项未覆盖，整批语义未通过。新增禁网录制核验和普通/优化各 10 项检查、四个定向追问离线接线；相关后端 33 项、预检及 16 自测通过，两项独立只读复核完成。38 个本批及 581 个旧文件摘要未变；三批 M3 累计 13 次、108429 tokens、估算 ¥0.1381404。后续追问仅为离线案例，未获新付费批次授权；不重复收费、不安装 LiteLLM。M3 整局、M4 与正式发布仍未通过，runtime_ready=false。下一步 M3：定向验证未覆盖边界与电话回应有效性，再准备完整整局；建议开发思考强度极高。 [本次内容复核与离线开发](docs/development/M3_CATALOG_REVIEW.md)。
+
+2026-09-08 此前准备检查点：用户决定不安装、不接入 LiteLLM，继续 M3。已完成新引用格式四例复验准备：套件 c6e17f38…dc8ae6，显式对白1.5/电话1.2，原四例正文/CLAIM/判据保持，独立新请求身份；四例免费演练、执行器普通及优化模式各13项、相关后端33项、预检及16自测通过。输入/来源与执行器两项独立只读复核无阻塞，581个旧文件摘要未变。新真实调用0、费用0、尚无新批准或执行凭据；下一步提交最多4次/40万tokens/估算¥0.50的新批次批准后进行实际格式与内容核对，原两批继续关闭。不自动追加付费批次、不启动整局或改变发布门禁；M3未完成，建议开发极高。详见[新引用格式验收](docs/development/M3_CATALOG_ACCEPTANCE.md)。
+
+此前检查点：M1三项采用已落实，M3工程已接线但真实整局未通过。最新4例复测已获用户“好的”批准，实际第2例引用类别错误INVALID后停止：1通过、1失败、2未测；2次请求、17085 tokens、保守¥0.0215724，预占归零。首例经历/必讲通过，第二例本次保密和归属正确但错误引用不能人工修正后算通过。两批M3累计9次请求、估算¥0.0922356。已完成新显式对白1.5/电话1.2引用目录约束：当次合法(collection,id)成对选择，排除策略/裁掉的历史，计入输入预算；旧提示/协议/prepared及失败收据保留。后端2382项通过，新引用16项覆盖；新候选124个输入容量检查通过，最大50952字节。候选51d31fa…及323来源、186步纯规则整局、18评分反例保持。前端本轮未改，旧分版本页面证据不冒充新模型验收。下一步仍为M3新引用格式真实复验及未测电话/不确定性，再回到整局；本批已结束，未启动新付费批次。后台审核、M4、正式发布均未通过。详见[M3整局记录](docs/development/M3_FULL_TEXT_PLAY.md)；runtime_ready=false，建议开发极高。
+
+读 `docs/development/README.md`、`BLUEPRINT_MAPPING.md`、`ACCEPTANCE.md`；
+接口设计见 `docs/contracts/`。当前已实现记录在 `backend/docs/FUSION_BASE_UPGRADE.md`。
+这些文件会明确区分“已实现”“待合并”“设计目标”；不得把文件存在当作运行生效。
+
+当前主线按用户 2026-09-07 确认的[交付计划](docs/development/DELIVERY_PLAN.md)推进：第一版是《孽岛疑云》完整文字试玩，M1 规则与来源对照 → M2 一段真实角色互动 → M3 完整文字整局 → M4 五角色及用户试玩；随后语音体验与上线。后台审核仍未真实验收通过，保持支线，不默认追加提示版本。计划批准不等于编辑规则或发布批准。M2有限片段已完成，M1其余规则决定与M3整局继续推进，最新实际成果与未验收项见下段。
+
+M2 已完成约定的有来源首阶段互动片段，见[角色对白与M2验收](docs/development/M2_ROLE_DIALOGUE.md)：真人发言、四AI回应与追问、实际台词触发私密回忆、保存恢复和明确元信息请求的程序拒答。后端2096、前端209、类型/lint/26页构建、隔离浏览器及独立复核通过。真实20次估算¥0.03355456；1.0内容12/13、1.1内容4/7，原失败保留。最终1.2仅做20输入离线复验和页面录制重放，没有新增真实生成。模型仍可能漏讲必讲内容，内部仅记ATTEMPTED_UNVERIFIED，不计分。M3整局、M4五选角、1.3模型审核及正式发布未完成，runtime_ready=false。下一轮M3准备阶段/封卷/答卷/评分的有源整局链和具体待决规则方案；建议极高，复杂权限与评分终审可用Ultra。
+
+此前 M2 子项见[实际事件触发私密回忆](docs/development/M2_MEMORY_TRIGGERS.md)：显式 1.3 已将实际公开发言和新获线索接入私密回忆授予、角色隔离、事件重放及本人页面。后端 2048 项、前端 204 项、类型/lint/26 页构建、隔离浏览器与真实单卡引擎核对通过；浏览器使用虚构双角色和模拟 SDK，不能代替商业整段。真实请求 0、费用 ¥0，临时服务已停止。新 1.3 模型编译/审核尚未接入，正式发布门禁继续阻断未审包；自然对白、转述义务完成、投票评分尚未完成。下一轮接一个首阶段片段的角色转述及追问回复，建议开发极高，runtime_ready=false。
+
+此前 M2 子项见[调查建议真实验收](docs/development/M2_PROPOSAL_ACCEPTANCE.md)：原运行适配器固定八例、双模型各一次，无重试。豆包格式8/8、动作8/8、动作及引用7/8；千问格式7/8、可评估动作7/7、完整案例5/8，另1条输出无效已拦截。两家存在公开引用不相关，不能称角色质量通过。16次估算¥0.00746476，本批停止新增；保留旧提示/协议/收据。五角色31目标25回忆有来源对照，整理版混入未批准编辑规则，不能整篇当开场输入；原卡不可出示与转述/必讲规则须分开。新增独立验收脚本及67项检查，后端2018项、预检与独立复核通过，无前端变化/主库迁移/商业发布，runtime_ready=false。下一轮继续M2实际发言触发私密回忆，再接有限范围自然转述；建议极高，交叉权限审查可用Ultra，无需逐轮重新授权。
+
+此前 M2 子项见[调查建议接线](docs/development/M2_INVESTIGATION_PROPOSALS.md)：公开讨论、AI 自有已解锁材料（含原文目标）与共同合法调查选项已接入显式新模型协议及页面。模型只选动作和公开依据，程序生成固定短句；不执行调查或计票，不宣称自然对白完成。首次 PROPOSE 冻结新模型元数据，追加 1.2 事件；旧 binding/材料模型/历史不改写。与旧问答共用预算和单次请求，逐请求回执支持重进检查、未知不重发。后端 1951、前端 200、类型/lint/26 页构建通过；虚构 SQLite/API/模拟 SDK 的桌面和 390px 浏览器通过，无新真实模型费用、无主库迁移。下一轮核对商业本第一阶段目标/来源并验证新协议真实模型判断质量；建议开发极高，复杂审查可用 Ultra，runtime_ready=false。
+
+此前 M2 子项见[公共讨论存档](docs/development/M2_PUBLIC_DISCUSSION.md)：现有文字试玩页可显式发送并恢复真人公开 CLAIM，服务端固定身份/阶段/顺序，沿用既有事务和事件表。首次 SPEAK 后追加 1.1 事件，旧 binding/事件/初始摘要保持；未启用讨论仍用原协议。发言使在途旧回答过期，不授予材料或花费模型预算。内部公开事件输入已接线，现有 AI 材料问答尚不读取讨论，AI 自然回应/调查提议/回忆仍未接入，不能标 M2 完成。后端 1929、前端 195、类型/lint/26 页构建通过；无真实 PostgreSQL/浏览器验收、无迁移/模型调用。下一轮接有来源的角色目标与按角色过滤的合法调查提议；建议开发 High，runtime_ready=false。
+
+此前 M2 子项见[角色决策能力评估](docs/development/ROLE_DECISION_ASSESSMENT.md)：已评估两家固定模型各六个虚构调查场景，非思考模式下基础选择符合预期；台词仍有无依据表述/理由生硬，不宣称角色质量通过。新增纯视图/决策提议与独立评估工具，后端 1909 项通过；实际 12 次估算 ¥0.00459568，无重试。本批停止追加请求，不以公共讨论接线宣称台词问题解决。
+
+此前工作包为 [4N 引用目录任务接线](docs/development/PHASE_4_CITATION_AUTHORING.md)：显式 Authoring 1.12 已将引用目录接入请求、动态 schema/预算、持久账本、worker 和工作台。旧任务保留原版本；跨目标/越界引用拒绝，未知调用不重发，BLOCKER 不删除。后端 1893 项、前端 188 项、类型/lint/26 页构建通过；四份旧冻结样本的新契约核对通过，旧 1.11 请求逐项未变。真实模型调用 0、新增费用 ¥0；供应商兼容性和语义准确性仍未验证，runtime_ready=false。下一步准备独立受限格式与语义验收，无需用户先改配置。
+
+此前工作包为 [4M 引用目录审核离线原型](docs/development/PHASE_4_CITATION_PROTOTYPE.md)：新增只选择已有引用的候选格式，服务器确定目标和来源，跨目标/越界/重复索引拒绝，保留 BLOCKER 及原完整领域校验。四份旧冻结样本共 60 项引用只读验证通过，后端 1869 项、前端 186 项通过；零模型调用、零新增费用。仅完成纯本地原型，尚未接入任务/worker/工作台，现有流程仍为 1.11，供应商兼容性与真实审核准确性未验证。下一步以显式新版本接入动态目录/schema 的快照、字节预算及持久核对，不直接替换旧任务；runtime_ready=false。
+
+此前工作包为 [4L 固定样本真实审核验收](docs/development/PHASE_4_SEMANTIC_ACCEPTANCE.md)：完成四组虚构 Audit 的冻结输入、单次执行凭据、预算及失败账本。真实请求均正常 stop，但 4/4 被格式或来源编号校验拒绝，语义结果 NOT_EVALUABLE，不能宣称误报改善。4 次请求估算 ¥0.0058458、预占 ¥0.0302446；停止本轮付费调用。后续补上目标不存在/来源编号不可用的安全位置诊断，仅离线与模拟验证、不回填旧收据。后端 1844 项、前端 186 项、类型/lint/26 页构建通过；无人审批准发布，runtime_ready=false。下一步先离线核对目标目录与输出约束，不靠重发、补引用或删发现制造通过。
+
+此前工作包为 [4K 版本化审核运行规则与反例](docs/development/PHASE_4_RUNTIME_AUDIT.md)：显式 1.11 将程序规则固定在审核系统消息，并复制当前候选结尾引用供核对；来源不能覆盖规则，旧任务不升级。新增正常、点数无法用尽、角色权限卡关三组离线样本，同时检查误报与漏报。后端 1824 项、前端 185 项、类型/lint/26 页构建通过，零真实模型调用、零新增费用；尚未证明真实审核准确率改善，无人审批准发布，runtime_ready=false。下一步冻结独立留出样本和评价规则后进行有边界的真实语义验收，不能仅以少报问题视为成功。
+
+此前工作包为 [4J 审核格式约束与程序规则核对](docs/development/PHASE_4_STRICT_AUDIT.md)：修复顶层 schema 并接入供应商结构约束，显式新任务 1.10 保留全部本地校验。真实 Audit 已能正常读取并通过来源编号校验，但 3 项意见含 1 BLOCKER，存在事实误报，烟测仍 FAILED；任务 COMPLETED 不代表人审通过。新增只读规则事实和实际结尾真相编号对照。后端 1800 项、前端 184 项、类型/lint/26 页构建通过。四轮共 8 次真实请求估算 ¥0.0102844，累计预占 ¥0.0616020；停止本轮付费调用，未批准发布，runtime_ready=false。下一步准备版本化审核运行上下文及独立语义验收集，不要求用户先换模型或改配置。
+
+此前工作包为 4I 简短审核与安全诊断，见 `docs/development/PHASE_4_BOUNDED_AUDIT.md`。显式 1.6 `audit_mode=BOUNDED_TARGET_SOURCE_INDEXES`，摘要≤240 字符、说明≤160 字符、发现≤10 项、必填 COMPLETE/INCOMPLETE；不完整、超长或非法引用均拒绝，仍无自动批准。新收据记录白名单 response_finish，未知值归 OTHER，不回填旧记录；安全字段诊断只保存有界固定路径。真实 Compiler、来源与原固定小样本质量通过；Audit 正常 stop、输出 341 tokens，但 AUDIT_BOUNDED_OUTPUT_INVALID，整链仍未通过。这次真实请求早于字段诊断，不知道具体错误字段，不猜测或回填。本轮 2 次真实请求，费用估算 ¥0.0017700，累计预占 ¥0.0151058，停止追加付费调用。后端 1743 项、前端 178 项、类型/lint/26 页构建通过；runtime_ready=false。下一步先核对模型输入契约表达和输出格式、验证安全字段定位，再安排有边界的后续验收，不反复换提示碰运气或恢复重发旧任务。
+
+此前工作包为 4H 审核来源编号，见 `docs/development/PHASE_4_INDEXED_AUDIT.md`。显式 `audit_mode=TARGET_SOURCE_INDEXES` 的 1.5 与固定正文模式配套，模型只选择目标自身来源编号，服务器仅还原所选引用再走原完整领域校验。空/非法/越界编号拒绝，不补引用，不升级旧任务。后端 1700 项、前端 175 项、类型/lint/26 页构建通过。真实 Compiler、来源及原固定小样本质量通过；Audit 非正常结束，输出用量达到 4096 上限，未进入编号解析，整链仍未通过。2 次真实请求估算 ¥0.0047386，累计预占 ¥0.0149548；停止本轮付费请求，任务 BLOCKED、无批准发布，runtime_ready=false。下一步解决审核长度与完整性及安全结束原因记录，不放宽覆盖/来源门槛或重复发送失败任务。
+
+此前工作包为 4G 固定正文与真实模型验收，见 `docs/development/PHASE_4_FROZEN_TEXT_ACCEPTANCE.md`。新增显式 `compiler_mode=CONFIRM_FROZEN_TEXT` 的 1.4 流程：AI 只检查准备稿并确认槽位，服务器原样保存全部正文和规则，不接受模型重写。真实 1.3 曾夹带管理说明；1.4 Compiler、来源核验和原固定小样本质量检查已通过，但 Audit 的第二条发现 sources 字段格式不合格，任务仍 BLOCKED，未批准发布。本轮 3 次真实请求（2 Compiler、1 Audit），已知费用估算 ¥0.0042334，累计预占 ¥0.0235712，停止追加付费请求。后端 1672 项、前端 174 项、类型/lint/26 页构建通过。下一步处理 Audit 来源结构，不猜测未保存的原始错误值，不补引用绕过校验。旧契约、提示与失败候选保留，runtime_ready=false。
+
+此前工作包为 4F 冻结规则草案与原文摘录，见 `docs/development/PHASE_4_FROZEN_RULE_PLAN.md`。显式新入口 `/authoring-jobs/with-rule-plan` 接收完整、带来源的待审 1.2 草案，冻结其规则，模型只填指定文本槽位；任务/请求契约 1.3，产物仍为 1.2。旧接口保持 16 KiB，新接口限制 1 MiB；不升级旧任务或修改历史失败候选。worker 必须显式 `--frozen-rule-plan --package-contract script-package/1.2`。后端 1652 项、前端 172 项及隔离浏览器上传/排队/刷新/异步过期检查通过；本轮零真实模型调用。草案冻结不证明规则语义正确，仍需 Audit 与完整人审发布门禁，新流程真实模型验收待做，`runtime_ready=false`。
+
+此前 4E 规则与来源逐项核对，见 `docs/development/PHASE_4_RULE_REVIEW.md`。新增管理员只读对照页/API，展示各项规则自身原文并提示直接动作与材料重复的公开证据前置；它不自动判定语义正确、不删除条件、不保存人审或批准发布。新收据包含 SDK 响应内容及响应 ID 的摘要，旧收据不回填。三个历史失败结果均已离线定位，原件/候选保持。
+
+此前 4D 按预算调查，历史事实见 `docs/development/PHASE_4_BUDGETED_INVESTIGATION.md`。显式 `script-package/1.2` 已接入逐阶段共享调查点、固定成本、全部前置条件、授权材料奖励与终末预算门槛；同一动作全局最多成功一次（含零成本），阶段点数不结转。调查点与模型费用独立，只有真人显式执行调查动作，不能假设 AI 会代搜证。新 Authoring/Audit/人工审核/独立发布链已工程接线，离线及隔离浏览器全链通过，前端 163 项、隔离 PostgreSQL 11 项、26 页构建通过。旧 1.0/1.1 契约与历史哈希不改写。
+
+新 1.2 的三次真实 Compiler v5/v6/v7 通过通用结构/原文摘录校验后，均被固定合成烟测的精确材料前置预期检查拦截（SMOKE_MATERIAL_PREREQUISITE_MISMATCH），Audit 均未调用，本轮付费提示迭代已停止。不得把此内容生成问题归为角色渠道配置错误，不得放宽该烟测标准或宣称新 1.2 真实完整链通过；通用校验器不因此具备任意原文语义判断能力。旧 1.1 真实链证据保留；自然对白、完整票制评分、主持与语音仍待完成，`runtime_ready=false`。以下为各阶段历史记录。
+
+仓库外“存档/待合并开发副本”中的独有schema/migration/tests已审查，见
+`docs/development/ARCHIVED_COPY_REVIEW.md`，不直接合并创作蓝图。模型适配后已实现
+候选包、确定性校验和同步导入记录，见 `docs/development/PHASE_2_PACKAGE_INTAKE.md`；
+来源冻结、文件/候选引用核验及管理员预览已实现，见 `docs/development/PHASE_3_SOURCE_VERIFICATION.md`。
+来源契约 v1.1 和人工审核/问题处理记录已实现，见 `docs/development/PHASE_3_REVIEW_RECORDS.md`。
+Compiler/模型 Audit 持久任务与工作台已接线，见 `docs/development/PHASE_3_AUTHORING_WORKFLOW.md`。
+固定字段现由服务端装配，模型只提交内容草稿，历史记录见 `docs/development/PHASE_3_COMPILER_ASSEMBLY.md`。
+2026-09-06 已通过双角色、双阶段合成资料的真实 script-package/1.1 Compiler v4 → 来源核验 → 候选 → Audit v3 链路；Audit 五维完整、2 项发现、0 BLOCKER，任务 COMPLETED。此前三轮 Compiler 失败及该轮首项 Audit 失败记录均保留，3C 证据见 `docs/development/PHASE_3_RULE_CONTRACT_REVIEW.md`。隔离只读 API 与模拟管理员身份下，真实任务/候选/审核结果的桌面及 390px 浏览器验收通过，未追加模型调用；该小样本不代表商业本、整局或模型整体语义质量通过。
+随后实现 3D 人审发布门禁与固定版本开场预览，历史记录见 `docs/development/PHASE_3_PUBLICATION_BINDING.md`：全部审核依据绑定、模型意见逐项人工处理、确认与登记发布分离，旧直接 PUBLISHED 入口阻断。该阶段新包只开放固定角色的开场预览，`runtime_ready=false`；不套用旧两轮规则。该轮没有付费模型调用、商业正文处理或对真实候选的实际批准，新增迁移仅离线验证，未应用真实 PostgreSQL。
+3D 最终后端 1085 passed（363 条存量弃用警告）、前端 89 passed，完整 TypeScript、修改文件 lint 与 24 页生产构建通过；开发预检退出码 0、自测 16 项通过。隔离合成夹具的人工确认→独立发布→普通玩家固定角色开场、刷新保持、访问权限及管理员/玩家 390px 无溢出验收通过，新增模型尝试为 0。
+此前 4A 固定角色确定性阶段演练已实现，历史记录见 `docs/development/PHASE_4_RULES_PREVIEW.md`，接口见 `docs/contracts/package-flow.md`。从旧开场显式新建并重新核验当前发布，旧开场保持只读且不自动升级；阶段按显式顺序推进，材料使用阶段下限、全部公开证据前置条件与公开证据连续解锁。仅自有已解锁 MAY_SHARE/MUST_SHARE 材料可手动公开，KEEP_PRIVATE 禁止；不虚构主持截止条件、不自动代分享。发布失效后新动作冻结，旧 GET 与原动作幂等重放保留已获内容。没有 AI、主持结算、后台真相或完整整局，`runtime_ready=false`。
+4A 最终后端 1195 passed（363 条已有弃用警告），其中新增 110 项为规则 53、持久化 37、整合 20；前端 114 passed，完整 TypeScript 和修改文件 lint 无诊断，预检退出码 0、自测 16 项通过，最新代码的 25 页生产构建通过。隔离合成夹具浏览器通过显式创建、分享后条件解锁、阶段推进、刷新/重新进入、权限拒绝与 390px 无溢出验收；最终 1 份演练、3 次动作，新增模型调用为 0，旧开场保持只读。临时 API 18016/前端 13016 已关闭，生产 API 配置仍为 8010。新增两表迁移 `n4a5b6c7d8e9` 仅离线验证，未应用真实 PostgreSQL。
+此前 4B 角色材料问答与结尾揭晓已接线，历史记录见 `docs/development/PHASE_4_TEXT_PLAY.md`，接口见 `docs/contracts/package-play.md`。新入口 `/play/package-play` 从固定开场显式创建独立会话，重新核验当前发布并固定角色、版本、模型和本局预算；旧开场与 4A 演练不升级。各 AI 角色共用本局公开记录和预算，输入仍按各自权限隔离。模型仅选择可公开资料引用，服务端核验后原样组装回答；选中的 AI 本人 MAY_SHARE/MUST_SHARE 材料正式公开并按规则继续解锁，KEEP_PRIVATE 不进入模型输入。真人仍手动推进和分享；到末阶段显式 SETTLE 只揭晓包指定的结尾说明与 truth_ids，之后禁止新操作。
+后续 4C 已通过一次真实火山模型的虚构材料选择→公开解锁→指定结尾→重读，估算费用 ¥0.000616；真实本机 PostgreSQL 随机隔离 schema 中 j0→o5 迁移及并发/恢复 9 项通过，临时 schema 已核验清理，未迁移主 schema。4C 当时后端离线检查 1443 passed（363 条存量警告，12.41 秒）。这些结果不代表商业本、自然对白或真实人审发布通过；`runtime_ready=false`，商业本胜负规则、自然对白、主持和语音仍待接线。4C 同时复核了《孽岛疑云》来源与编辑规则差异，详见阶段 4C 记录。
+4B 历史验收状态：后端 1378 passed（363 条已有弃用警告，12.35 秒；新增 183 项已计入），前端八套 152 passed，完整 TypeScript 无诊断，CommonJS 测试文件类型配置下的修改文件 lint 通过，预检退出码 0、自测 16 项通过。隔离合成夹具浏览器通过从旧开场显式创建、AI 材料原文问答与正式分享、真人分享后条件解锁、三阶段推进、指定真相揭晓、刷新/重进、权限与 390px 无溢出验收；最终 1 份试玩、6 条事件、1 次模拟 SDK 调用、0 次真实模型调用，旧开场保持不变，浏览器空间 60 已关闭，临时 API 18017/前端 13017 已正常退出且端口关闭。4B 当时最终生产构建通过，共 26 页，生产 API 配置仍为 `http://127.0.0.1:8010`。
+不自动合并或覆盖当前未提交的安全修复。完成一个小工作包就运行相关测试并记录真实结果。
+
+## 源码与现有边界
+
+- Python `>=3.13,<3.14`，uv锁定依赖；Next/React具体版本看frontend/package.json和锁文件。
+- Fusion：`backend/src/fusion/{rules,service,agents,knowledge,websocket}.py`。
+- 候选导入：`backend/src/fusion/{package_validation,package_import}.py`，严格契约在
+  `backend/src/schemas/script_package.py`；导入只存候选，最终确认与发布由独立门禁处理。
+- 来源核验：`backend/src/fusion/source_bundles.py`；私有文件快照与报告，管理员入口
+  `/admin/source-bundles`。文件一致不代表语义审核、OCR 校对或人审批准。
+- 审核记录：`backend/src/fusion/script_review.py`、`frontend/src/pages/admin/script-reviews.tsx`；
+  来源/候选哈希绑定、人工问题处理和完整历史；不会自动生成 Audit 结论或批准发布。
+- 人审发布：`backend/src/fusion/script_publication.py`、审核页下方的最终确认与发布板；完整审核依据哈希绑定确认，登记后形成不可变发布记录。模型建议与人工报告独立，模型不拥有批准权限。
+- 开场预览：`backend/src/fusion/package_runtime.py`、`/play/package-preview`；绑定发布版本和所选角色，仅返回授权开场材料，无 AI 动作或完整试玩。发布后的审核变更会阻止新建开场，需新 `content_version` 重新审核；已有开场保持原版本，旧游戏会话不改写。
+- 阶段演练：`backend/src/fusion/{package_flow,package_flow_rules}.py`、`/play/package-flow`；仅接受 1.0/1.1 包，1.2 明确拒绝。独立创建固定角色演练，仅支持手动推进与授权材料分享，追加事件并按 revision/幂等键防重复；GET 不解锁新权限，不改旧开场或旧游戏。
+- 文字试玩：`backend/src/fusion/{package_play,package_play_rules,package_role_model}.py`、`/play/package-play`；独立会话与多角色公开账本，先预占预算再单次请求，模型只选引用，服务端分享和组装原文。支持手动阶段、材料分享及末阶段指定结尾，未知/过期结果不重发、不新增知识；旧开场/演练不升级。
+- 按预算调查：`backend/src/fusion/{package_play_engine,package_investigation_rules}.py`；按冻结版本白名单选择规则。1.2 的 PERFORM_ACTION 在同一事务扣点、记录动作与授予材料，只展示当前获准且付得起的动作，不暴露隐藏奖励；推进与 SETTLE 均遵守包的预算门槛。结构可达不代表每个真人选角/行动顺序都可完成，内容审核必须另验。
+- 新前端：`frontend/src/pages/play/`、`frontend/src/components/FusionEvidencePanel.tsx`。
+- 后端API鉴权：`backend/src/core/auth_middleware.py`；优先复用统一路径策略与用户依赖。
+- ORM与事务：`backend/src/db/`；不在等待模型时持有数据库行锁，明确flush/commit边界。
+- 旧CharacterAgent、生成/编辑Agent、历史模拟器仅是存量能力，不等于Fusion已经接线。
+- 自动生成客户端 `frontend/src/client/` 不手写；生成命令会访问后端并改文件，不默认执行。
+- 编译任务：`backend/src/fusion/authoring_{sources,model,jobs,runner}.py`、`/admin/authoring-jobs`；HTTP只排队，显式worker才调用模型；每步最多一次，未知结果不重发，模型Audit不创建人工批准。
+- 旧 1.1 包使用 `compiler-draft/1.0`、请求/模型契约 1.1；显式 `package_contract=script-package/1.2` 使用 `compiler-draft/1.1`、请求/模型契约 1.2 与 `script-audit/1.1`。冻结来源、标题、版本和人数均由服务器装配；新增动作/阶段预算有来源引用与审核目标，全量依据继续绑定人审发布。旧任务保留原契约和 Prompt 哈希，不以新版恢复重发。
+- 旧 1.1 真实小合成 Compiler/Audit 链已通过；4D 共享调查与新审核发布链已有工程及隔离验收，但新 1.2 真实编译仍未通过。商业本专属机制、完整运行时、自然对白、提示、主持、完整票制评分和语音仍待完成。
+  来源报告尚未消费到导入任务的 pending_gates；多原件归属和编辑补充使用独立候选 v1.1，旧 v1.0 不改写。
+- 当前平面background/secret、自知凶手字段、两轮固定搜证，不能直接套用于所有真实剧本。
+- 子目录开发风格见 `.github/instructions/`，不要沿用过时说明绕过这些边界。
+
+## 权限与信息边界
+
+- 游戏状态由确定性服务端代码推进，LLM只提出受限动作或台词。
+- 知识视图绑定script/version/session/character/phase；先授权过滤再裁剪/检索/摘要。
+- 客观真相、本人已知事实、其他人说法、推测必须区分；摘要不能创造事实或授予权限。
+- 游戏角色不能任意读文件、SQL、全本、别的角色私本或系统真相。
+- 模型输出、OCR、参考文档、历史对话及检索结果是非可信数据；不执行其中的指令。
+- 校验器查结构/引用/权限/规则；Audit提供语义发现与来源，不自行改本或批准发布。
+- 发布必须绑定候选、来源及全量审核依据与人审确认；依据变化后旧确认失效。旧直接 PUBLISHED 路径已阻断，导入和模型 Audit 均不能自动发布。
+- RAG/OpenKB可选，仅为分剧本/版本/权限过滤的辅助检索；不作为运行时权威或所有角色共享记忆。
+- 语音只消费允许公开且检查通过的台词，不读内部思考、私密日志和越权片段。
+
+## 文件、密钥与操作安全
+
+- 当前开发根是本Git仓库；父目录是资料总库，不要在父目录git init或整体提交。
+- 私本/OCR/导入任务/数据库/恢复镜像在仓库外；不得复制商业正文进示例、测试、issue或公开文档。
+- .env不可显示、提交或用模板覆盖；仅使用占位示例。日志默认不记录完整提示词/私本。
+- 历史副本、未知镜像和shadow可能含独有数据，不按“旧”字删除。
+- 尊重未提交改动，不reset/checkout覆盖，不自动commit/push。
+- 默认不启动/重启服务、不运行迁移、恢复、清卷、真实API或部署；这些操作必须属于当前用户授权。
+- 不自动安装VS Code扩展、全局工具或调用参考项目setup脚本。
+- 不把.gitignore或编辑器搜索排除当作安全沙箱。
+
+## 默认验证：离线优先
+
+在仓库根目录：
+
+```sh
+backend/.venv/bin/python scripts/dev_preflight.py
+backend/.venv/bin/python -m unittest discover -s scripts -p 'test_dev_preflight.py'
+backend/.venv/bin/python backend/scripts/test_fusion_security.py
+git diff --check
 ```
 
-### Frontend
-```bash
-cd frontend
-npm run dev               # dev server (port 3001)
-npm run build && npm run start  # production (port 8009)
-npm run generate-api      # regenerate OpenAPI client from http://localhost:8010/openapi.json
+在frontend目录：
+
+```sh
+node --test tests/fusion-evidence-panel.test.cjs tests/source-bundle-panel.test.cjs tests/script-review-panel.test.cjs tests/authoring-jobs-panel.test.cjs tests/script-publication-panel.test.cjs tests/package-preview-service.test.cjs tests/package-flow-panel.test.cjs tests/package-play-panel.test.cjs
+node node_modules/typescript/bin/tsc --noEmit --incremental false
 ```
 
-> The frontend dev server is hot-reloading. Don't restart it if a port is already occupied.
+不要直接自动跑旧全量pytest/conftest，可能初始化真实应用；不要默认执行npm的旧next lint脚本。
+迁移后的.venv入口脚本可能有旧shebang，直接用解释器或 `python -m`，不要依赖activate。
+离线测试通过不等于真实PostgreSQL锁、模型质量、语音或整局验收通过。
+每次交接说明修改、验证命令/结果、未测范围和下一步，不以“AI说完成”作为成功证据。
 
-### Dev dependencies (hybrid Docker mode)
+用户于 2026-09-07 要求：每轮开发结束，必须用简单中文写清下一轮的进度计划和建议思考强度。固定包含：本轮实际成果及未通过项；下一轮所属里程碑、具体工作、可见交付物和验收方式；建议开发思考强度及简短理由；确实需要用户决定的事项。避免只报测试数量、虚假完成百分比或没有依据的时间承诺。思考强度必须标明是建议，不声称已切换无法确认的会话设置；与游戏内模型 thinking 开关区分。常规工作继续遵循既有授权，不因此增加逐轮确认流程。
 
-`docker-compose.dev.yml` runs only PostgreSQL + MinIO for local dev; backend and frontend run on the host. No restart policy — containers stay stopped until started manually.
 
-```bash
-docker compose -f docker-compose.dev.yml up -d   # start db (localhost:5432) + minio (9000/9001)
-docker compose -f docker-compose.dev.yml down    # stop (add -v to wipe data)
-```
+## 本地开发与数据保护
 
-`docker-compose.yml` (root) is the production all-in-one deployment; don't use it for daily dev.
+根.env.example是容器模板，db/redis这些容器DNS名在宿主机通常不可用。
+VS Code启动任务仅手动执行，明确绑定回环地址；启动应用可能建表、后续交互可能付费。
+Docker不可用/目标数据库不明/备份未验证时，仍可编码和离线测试，但不要宣称集成环境准备完毕。
+禁止默认运行清除数据卷的命令。迁移前识别Compose项目名、实际卷、数据库和最近备份。
 
-### Docker (one-click deploy)
-```bash
-docker compose up -d --build   # frontend :8009, backend :8010, Postgres 16 (internal)
-docker compose down -v         # stop and wipe data volumes
-```
-
-- Root `docker-compose.yml` + `backend/Dockerfile` + `frontend/Dockerfile`. Config comes from the root `.env`; compose overrides `DB_HOST=db` and defaults `FILE_STORAGE=dir`.
-- The frontend image bakes in `NEXT_PUBLIC_API_URL` (browser → backend URL) at build time — rebuild the frontend image if it changes.
-- Data volumes: `pgdata` (Postgres), `backend_static` (/app/static), `backend_data` (/app/.data).
-
----
-
-## Backend Architecture
-
-Entry: `backend/main.py` → app wiring in [`backend/src/core/server.py`](backend/src/core/server.py).
-
-```
-src/
-├── api/routes/       # Route handlers (auth, scripts, game, character, evidence, location, tts, image, etc.)
-├── core/             # App wiring, DI container, auth middleware, WebSocket server, game engine
-├── db/
-│   ├── models/       # SQLAlchemy ORM models
-│   ├── repositories/ # Data access layer
-│   ├── session.py    # Engine + session factory
-│   └── migrations/   # Alembic migrations
-├── schemas/          # Pydantic request/response models
-└── services/         # Business logic (auth, LLM, TTS, image, script editor, game history, etc.)
-```
-
-### Dependency Injection
-
-Custom DI container in [`backend/src/core/dependency_container.py`](backend/src/core/dependency_container.py). Three lifetimes: `singleton`, `scoped`, `transient`.
-
-- **Singletons**: `DatabaseManager`, `LLMService`
-- **Scoped** (per-request, auto DB commit/rollback): repositories, most services
-- FastAPI integration via [`backend/src/core/container_integration.py`](backend/src/core/container_integration.py)
-
-See [DEPENDENCY_INJECTION_MIGRATION.md](backend/docs/DEPENDENCY_INJECTION_MIGRATION.md) for migration details and [SERVICE_ARCHITECTURE.md](backend/docs/SERVICE_ARCHITECTURE.md) for service design.
-
-### Authentication
-
-Unified JWT middleware in [`backend/src/core/auth_middleware.py`](backend/src/core/auth_middleware.py):
-- Path-regex policies: `NONE` / `OPTIONAL` / `REQUIRED` / `ADMIN`
-- Injects `request.state.current_user` and `request.state.is_authenticated`
-- Routes read the user via helpers from the middleware module (e.g. `Depends(get_current_active_user_from_request)`) — this is the single auth path; token verification itself lives in `AuthService` (`verify_token` / `get_user_from_token`), also reused by the WebSocket endpoint
-
-See [AUTH_MIDDLEWARE_GUIDE.md](backend/docs/AUTH_MIDDLEWARE_GUIDE.md) for usage.
-
-### Database
-
-- ORM: SQLAlchemy (sync) declarative models
-- Session: `sessionmaker` in [`backend/src/db/session.py`](backend/src/db/session.py)
-- Migrations: Alembic in [`backend/src/db/migrations/`](backend/src/db/migrations/)
-- **Note**: `init_database()` also calls `create_tables()` at startup — runtime auto-create coexists with Alembic
-
-### WebSocket
-
-- Endpoint: `GET /api/ws?token=...&script_id=...` in [`server.py`](backend/src/core/server.py)
-- Core logic in [`backend/src/core/websocket_server.py`](backend/src/core/websocket_server.py)
-- Message routing by `type` field to handler registry
-- Sessions map: `session_id → GameSession`, `websocket → session_id`
-
-### Script Generation (ReAct Agent)
-
-AI 剧本生成走 WebSocket 上的分步 Agent 流程（非黑盒 HTTP）：
-
-- Agent: [`backend/src/agents/script_generation_agent.py`](backend/src/agents/script_generation_agent.py) — ReAct 循环（thought → tool call → observation），工具即生成步骤：`save_script_info / save_background_story / save_characters / save_locations / save_evidence / save_game_phases / finish`。每步独立事务落库；校验失败作为 observation 回喂 LLM 自我修正；`finish` 时缺少 game_phases 会补默认六阶段。
-- WS 消息：客户端发 `start_script_generation`（script_id/theme/player_count/script_type）、`cancel_script_generation`、`get_script_generation_state`（断线回放）；服务端推 `script_generation_event`（step_start/thought/action/observation/step_end/done/error/cancelled）与完成后的 `script_data_update`。
-- 思考透出：`llm_service.py` 的 `LLMResponse.reasoning_content`、`chat_completion_stream_chunks` 与 `split_think_tags` 负责分离 reasoning 与正式内容。
-- 前端：`scriptGenerationStore.ts` + `ScriptGenerationPanel.tsx`（步骤时间线 + 事件流），入口 `pages/script-manager/create.tsx`；`websocketStore.connect(scriptId, { autoEdit: false })` 可避免连接时自动进入编辑模式。
-
-### Script Editing (ReAct Agent)
-
-AI 剧本对话式编辑同样走 ReAct Agent（替代旧的 categorize → parse → execute 两段式管线）：
-
-- Agent: [`backend/src/agents/script_editing_agent.py`](backend/src/agents/script_editing_agent.py) — 结构镜像生成 Agent（`_emit` / `run()` / tools 模式 + JSON 行动降级 / 四件套事件）。先 `plan` 规划再逐个调用工具；批量创建必须逐个 add；校验失败作为 observation 回喂自我修正。
-- 工具：角色/证据/场景 add/update/delete（构造 `EditInstruction` 复用 `ScriptEditorService.execute_instruction` 的校验与增量落库）、`update_script_info`、`update_background_story`、game_phases 四工具（`ScriptRepository` 新增 flush-only 方法）、`bind_character_voice`（音色匹配逻辑在 `src/services/tts_voices.py`，与 `/api/tts/voices` 共用）、`finish`。
-- 事务：Agent 共享编辑会话的长寿命 db_session，工具只 flush，commit 由 WS handler 在 `successful_ops > 0` 时统一执行。`plan_only=True` 时工具在 SAVEPOINT 内执行并回滚（只校验不落库），供 HTTP `/api/script-editor/parse-instruction` 返回解析计划。
-- 事件契约不变：`script_edit_event`（`{type, step, step_name, content, kind, data, timestamp}`），step 取值改为工具域（plan/characters/evidence/locations/script_info/background_story/game_phases/voice，中文名映射在 `EDIT_STEP_NAME`）；`edit_result` 由 handler 按 `result.tool_results` 逐条广播。
-
----
-
-## Frontend Architecture
-
-Pages Router (`src/pages/`). See [frontend instructions](.github/instructions/frontend.instructions.md) for full conventions.
-
-```
-src/
-├── client/           # Auto-generated OpenAPI client (DO NOT edit manually)
-├── components/
-│   ├── ui/           # shadcn/ui base components (kebab-case filenames)
-│   └── *.tsx         # Business components (PascalCase filenames)
-├── hooks/            # Custom React hooks
-├── pages/            # Next.js pages
-├── services/         # Hand-written API wrappers (authService, scriptService, etc.)
-├── stores/           # Zustand stores
-└── types/            # TypeScript types
-```
-
-### State Management (Zustand)
-
-Key stores:
-- [`authStore.ts`](frontend/src/stores/authStore.ts) — auth state + token
-- [`websocketStore.ts`](frontend/src/stores/websocketStore.ts) — WebSocket connection + game runtime state
-- [`configStore.ts`](frontend/src/stores/configStore.ts) — API base URL configuration
-
-Store pattern: `useXxxStore`, file named `xxxStore.ts`, uses `persist` for durable state.
-
-### API Calls
-
-Prefer the **auto-generated client** (`src/client/`) for new endpoints. Run `npm run generate-api` after backend schema changes. Hand-written services in `src/services/` wrap the generated client or call `fetch` directly. Base URL comes from `configStore`.
-
-### Design System
-
-Dark theme. Primary gradient: `from-[#1a237e] via-[#311b92] to-[#4a148c]`. Use Tailwind + shadcn/ui. See [frontend instructions](.github/instructions/frontend.instructions.md) for color, spacing, and component conventions.
-
----
-
-## Testing
-
-Tests live in [`backend/tests/`](backend/tests/). Key files:
-
-- [`conftest.py`](backend/tests/conftest.py) — fixtures: `test_client`, `mock_db_session` (autouse), `mock_current_user`
-- [`factories.py`](backend/tests/factories.py) — reusable model factories
-- Markers: `api`, `unit`, `integration`, `slow`
-
-Mocking: `mock_db_session` patches `db_manager` globally; don't set up real DB in unit tests.
-
----
-
-## Environment Variables
-
-| Category | Key variables |
-|----------|--------------|
-| LLM | `LLM_PROVIDER`, `OPENAI_API_KEY`, `OPENAI_BASE_URL`, `OPENAI_MODEL` |
-| TTS | `TTS_PROVIDER`, `TTS_API_KEY`, `TTS_MODEL`, `MINIMAX_GROUP_ID`, `COSYVOICE_BASE_URL` |
-| Database | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` |
-| Storage | `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET_NAME` |
-| Auth | `SECRET_KEY`, `ACCESS_TOKEN_EXPIRE_MINUTES` |
-| Server | `HOST`, `PORT`, `DEBUG` |
-
-Config loaded in [`backend/src/core/config.py`](backend/src/core/config.py).
-
----
-
-## Key Docs
-
-| Doc | Topic |
-|-----|-------|
-| [AUTH_MIDDLEWARE_GUIDE.md](backend/docs/AUTH_MIDDLEWARE_GUIDE.md) | How to use the unified auth middleware |
-| [DEPENDENCY_INJECTION_MIGRATION.md](backend/docs/DEPENDENCY_INJECTION_MIGRATION.md) | DI container migration and usage |
-| [SERVICE_ARCHITECTURE.md](backend/docs/SERVICE_ARCHITECTURE.md) | Service layer design patterns |
-| [MINIMAX_CLIENT_GUIDE.md](backend/docs/MINIMAX_CLIENT_GUIDE.md) | MiniMax TTS/image integration |
-| [README_SCRIPT_MANAGER.md](backend/docs/README_SCRIPT_MANAGER.md) | Script management features |
-| [migration_guide.md](backend/docs/migration_guide.md) | Data model migration notes |
+开发代理指令形式参考官方说明：
+https://learn.chatgpt.com/docs/agent-configuration/agents-md

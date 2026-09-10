@@ -68,8 +68,8 @@ class UnifiedAuthMiddleware(BaseHTTPMiddleware):
             AuthRule(r"^/api/auth/verify-token", AuthLevel.NONE, ["POST"]),
             
             # 公开的剧本搜索和浏览
-            AuthRule(r"^/api/scripts/public", AuthLevel.NONE, ["GET"]),
-            AuthRule(r"^/api/scripts/search", AuthLevel.NONE, ["GET"]),
+            AuthRule(r"^/api/scripts/public/?$", AuthLevel.NONE, ["GET"]),
+            AuthRule(r"^/api/scripts/search/?$", AuthLevel.NONE, ["GET"]),
             
             # 文件下载（可选认证，用于访问控制）
             AuthRule(r"^/api/files/download/.*", AuthLevel.OPTIONAL, ["GET"]),
@@ -77,23 +77,26 @@ class UnifiedAuthMiddleware(BaseHTTPMiddleware):
             # 管理员专用路径
             AuthRule(r"^/api/admin/.*", AuthLevel.ADMIN),
             AuthRule(r"^/api/auth/users", AuthLevel.ADMIN, ["GET"]),
+
+            # These legacy APIs return omniscient authoring data, not a player's
+            # permitted role view. Players must use /api/fusion instead. Exact
+            # public catalog exceptions are above; nested look-alike paths are
+            # never exempt from administrator authorization.
+            AuthRule(r"^/api/(?:scripts|characters|evidence|locations|script-editor)(?:/|$)", AuthLevel.ADMIN),
+
+            # Legacy simulator/history expose omniscient state and lack a
+            # per-character event projection. Keep them as administrator debug
+            # tools; player state/replay uses the scoped /api/fusion endpoints.
+            AuthRule(r"^/api/users/game-history(?:/|$)", AuthLevel.ADMIN),
+            AuthRule(r"^/api/game(?:/|$)", AuthLevel.ADMIN),
             
             # 需要认证的用户相关路径
             AuthRule(r"^/api/auth/me", AuthLevel.REQUIRED),
             AuthRule(r"^/api/auth/logout", AuthLevel.REQUIRED),
             AuthRule(r"^/api/auth/change-password", AuthLevel.REQUIRED),
             
-            # 需要认证的剧本管理
-            AuthRule(r"^/api/scripts(?!/public|/search).*", AuthLevel.REQUIRED),
-            
-            # 需要认证的角色管理
-            AuthRule(r"^/api/characters/.*", AuthLevel.REQUIRED),
-            
             # 需要认证的用户功能
             AuthRule(r"^/api/users/.*", AuthLevel.REQUIRED),
-            
-            # 需要认证的证据管理
-            AuthRule(r"^/api/evidence/.*", AuthLevel.REQUIRED),
             
             # 需要认证的文件上传
             AuthRule(r"^/api/files/upload", AuthLevel.REQUIRED, ["POST"]),
@@ -135,6 +138,7 @@ class UnifiedAuthMiddleware(BaseHTTPMiddleware):
         """创建认证错误响应"""
         return JSONResponse(
             status_code=status_code,
+            headers={"Cache-Control": "no-store"},
             content={
                 "success": False,
                 "message": message,

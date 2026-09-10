@@ -1,0 +1,730 @@
+{
+  "$defs": {
+    "CompileBlocker": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "enum": [
+            "SOURCE_GAP",
+            "UNSUPPORTED_MECHANIC",
+            "CONTRADICTION"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Message",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "sources"
+      ],
+      "title": "CompileBlocker",
+      "type": "object"
+    },
+    "CompilerContentV12": {
+      "additionalProperties": false,
+      "properties": {
+        "introduction": {
+          "$ref": "#/$defs/SourcedText"
+        },
+        "characters": {
+          "items": {
+            "$ref": "#/$defs/PackageCharacter"
+          },
+          "maxItems": 8,
+          "minItems": 2,
+          "title": "Characters",
+          "type": "array"
+        },
+        "initial_phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Initial Phase Id",
+          "type": "string"
+        },
+        "phases": {
+          "items": {
+            "$ref": "#/$defs/PackagePhase"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Phases",
+          "type": "array"
+        },
+        "knowledge": {
+          "items": {
+            "$ref": "#/$defs/KnowledgeItemV12"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Knowledge",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/PackageEvidenceV12"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "truth": {
+          "items": {
+            "$ref": "#/$defs/TruthItem"
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Truth",
+          "type": "array"
+        },
+        "settlement": {
+          "$ref": "#/$defs/Settlement"
+        },
+        "mechanics": {
+          "$ref": "#/$defs/InvestigationMechanics"
+        }
+      },
+      "required": [
+        "introduction",
+        "characters",
+        "initial_phase_id",
+        "phases",
+        "knowledge",
+        "evidence",
+        "truth",
+        "settlement",
+        "mechanics"
+      ],
+      "title": "CompilerContentV12",
+      "type": "object"
+    },
+    "InvestigationAction": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Label",
+          "type": "string"
+        },
+        "cost": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Cost",
+          "type": "integer"
+        },
+        "phase_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Phase Ids",
+          "type": "array"
+        },
+        "allowed_character_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Allowed Character Ids",
+          "type": "array"
+        },
+        "required_action_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Action Ids",
+          "type": "array"
+        },
+        "required_public_evidence_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Public Evidence Ids",
+          "type": "array"
+        },
+        "origin": {
+          "enum": [
+            "SOURCE_EXPLICIT",
+            "EDITORIAL"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "cost",
+        "phase_ids",
+        "allowed_character_ids",
+        "origin",
+        "sources"
+      ],
+      "title": "InvestigationAction",
+      "type": "object"
+    },
+    "InvestigationMechanics": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_budgets": {
+          "items": {
+            "$ref": "#/$defs/PhaseActionBudget"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Phase Budgets",
+          "type": "array"
+        },
+        "actions": {
+          "items": {
+            "$ref": "#/$defs/InvestigationAction"
+          },
+          "maxItems": 5000,
+          "minItems": 1,
+          "title": "Actions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_budgets",
+        "actions"
+      ],
+      "title": "InvestigationMechanics",
+      "type": "object"
+    },
+    "KnowledgeItemV12": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "FACT",
+            "CLAIM",
+            "INFERENCE"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "PUBLIC",
+            "CHARACTER_PRIVATE"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "character_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Character Id"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseRuleV12"
+        },
+        "disclosure": {
+          "enum": [
+            "PUBLIC",
+            "MAY_SHARE",
+            "MUST_SHARE",
+            "KEEP_PRIVATE"
+          ],
+          "title": "Disclosure",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "kind",
+        "visibility",
+        "character_id",
+        "release",
+        "disclosure",
+        "sources"
+      ],
+      "title": "KnowledgeItemV12",
+      "type": "object"
+    },
+    "PackageCharacter": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "sources"
+      ],
+      "title": "PackageCharacter",
+      "type": "object"
+    },
+    "PackageEvidenceV12": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "PUBLIC",
+            "CHARACTER_PRIVATE"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "character_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Character Id"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseRuleV12"
+        },
+        "disclosure": {
+          "enum": [
+            "PUBLIC",
+            "MAY_SHARE",
+            "MUST_SHARE",
+            "KEEP_PRIVATE"
+          ],
+          "title": "Disclosure",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "visibility",
+        "character_id",
+        "release",
+        "disclosure",
+        "sources"
+      ],
+      "title": "PackageEvidenceV12",
+      "type": "object"
+    },
+    "PackagePhase": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Title",
+          "type": "string"
+        },
+        "next_phase_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Phase Id"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "next_phase_id",
+        "sources"
+      ],
+      "title": "PackagePhase",
+      "type": "object"
+    },
+    "PhaseActionBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "points": {
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Points",
+          "type": "integer"
+        },
+        "advance_policy": {
+          "enum": [
+            "ALLOW_REMAINING",
+            "REQUIRE_EXHAUSTED"
+          ],
+          "title": "Advance Policy",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "SOURCE_EXPLICIT",
+            "EDITORIAL"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_id",
+        "points",
+        "advance_policy",
+        "origin",
+        "sources"
+      ],
+      "title": "PhaseActionBudget",
+      "type": "object"
+    },
+    "ReleaseRuleV12": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "required_public_evidence_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Public Evidence Ids",
+          "type": "array"
+        },
+        "required_action_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Action Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_id"
+      ],
+      "title": "ReleaseRuleV12",
+      "type": "object"
+    },
+    "Settlement": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "truth_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Truth Ids",
+          "type": "array"
+        },
+        "instructions": {
+          "$ref": "#/$defs/SourcedText"
+        }
+      },
+      "required": [
+        "phase_id",
+        "truth_ids",
+        "instructions"
+      ],
+      "title": "Settlement",
+      "type": "object"
+    },
+    "SourceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        }
+      },
+      "required": [
+        "source_id"
+      ],
+      "title": "SourceReference",
+      "type": "object"
+    },
+    "SourcedText": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "sources"
+      ],
+      "title": "SourcedText",
+      "type": "object"
+    },
+    "TruthItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "visibility": {
+          "const": "SYSTEM_TRUTH",
+          "title": "Visibility",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "visibility",
+        "sources"
+      ],
+      "title": "TruthItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "compiler-draft/1.1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "CANDIDATE",
+        "BLOCKED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "content": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CompilerContentV12"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "blockers": {
+      "items": {
+        "$ref": "#/$defs/CompileBlocker"
+      },
+      "maxItems": 100,
+      "title": "Blockers",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "status",
+    "content",
+    "blockers"
+  ],
+  "title": "CompilerDraftOutputV12",
+  "type": "object"
+}

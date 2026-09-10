@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/stores/authStore';
 import { Loader2 } from 'lucide-react';
+import { authReturnPath } from '@/lib/authReturnPath';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -15,8 +16,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, redirectTo = '/auth/log
 
   useEffect(() => {
     // 如果未认证且不在加载中，重定向到登录页
-    if (!isLoading && !isAuthenticated) {
-      router.push(redirectTo);
+    if (router.isReady && !isLoading && !isAuthenticated) {
+      router.replace({ pathname: redirectTo, query: { returnUrl: authReturnPath(router.asPath) } });
     }
   }, [isAuthenticated, isLoading, router, redirectTo]);
 

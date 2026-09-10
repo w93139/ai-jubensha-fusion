@@ -8,6 +8,10 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
+
+class LLMRequestNotDispatched(RuntimeError):
+    """A trusted local gate refused before any provider request was sent."""
+
 @dataclass
 class LLMMessage:
     """LLM消息"""
@@ -24,10 +28,12 @@ class ToolCall:
 class LLMResponse:
     """LLM响应"""
     content: str
-    usage: Optional[Dict[str, int]] = None
+    usage: Optional[Dict[str, Any]] = None
     model: Optional[str] = None
     tool_calls: Optional[List[ToolCall]] = None
     reasoning_content: Optional[str] = None  # 推理模型的思考过程（DeepSeek/Kimi 等 reasoning_content 字段）
+    request_id: Optional[str] = None
+    finish_reason: Optional[str] = None
 
 @dataclass
 class StreamChunk:
@@ -105,10 +111,12 @@ class BaseLLMService(ABC):
 class OpenAILLMService(BaseLLMService):
     """OpenAI LLM服务"""
     
-    def __init__(self, api_key: str, base_url: Optional[str] = None, model: str = "gpt-3.5-turbo", **kwargs):
+    def __init__(self, api_key: str, base_url: Optional[str] = None, model: str = "gpt-3.5-turbo",
+                 client_max_retries: Optional[int] = None, **kwargs):
         self.api_key = api_key
         self.base_url = base_url
         self.model = model
+        self.client_max_retries = client_max_retries
         self.extra_params = kwargs
         self._client = None
     
@@ -117,10 +125,10 @@ class OpenAILLMService(BaseLLMService):
         if self._client is None:
             try:
                 from openai import AsyncOpenAI
-                self._client = AsyncOpenAI(
-                    api_key=self.api_key,
-                    base_url=self.base_url
-                )
+                client_params = {"api_key": self.api_key, "base_url": self.base_url}
+                if self.client_max_retries is not None:
+                    client_params["max_retries"] = self.client_max_retries
+                self._client = AsyncOpenAI(**client_params)
             except ImportError:
                 raise ImportError("openai package is required for OpenAI LLM service")
         return self._client
@@ -148,10 +156,16 @@ class OpenAILLMService(BaseLLMService):
         message = response.choices[0].message
         return LLMResponse(
             content=message.content or "",  # 模型只调用工具时 content 可能为 None
-            usage=response.usage.model_dump() if response.usage else None,
+            # Optional nested counters are absent on some compatible providers.
+            # Dropping None keeps a valid partial detail object from being
+            # mistaken for contradictory/unknown usage downstream.
+            usage=response.usage.model_dump(exclude_none=True) if response.usage else None,
             model=response.model,
             tool_calls=_parse_openai_tool_calls(message),
             reasoning_content=getattr(message, "reasoning_content", None) or None,
+            request_id=response.id if isinstance(getattr(response, "id", None), str) else None,
+            finish_reason=(response.choices[0].finish_reason
+                           if isinstance(response.choices[0].finish_reason, str) else None),
         )
     
     async def chat_completion_stream(self, messages: List[LLMMessage], **kwargs) -> AsyncGenerator[str, None]:

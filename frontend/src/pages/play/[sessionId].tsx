@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { ChevronRight, Loader2, LockKeyhole, Search, Send, Vote } from 'lucide-react';
 import AuthGuard from '@/components/AuthGuard';
 import AppLayout from '@/components/AppLayout';
+import FusionEvidencePanel from '@/components/FusionEvidencePanel';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import fusionGameService from '@/services/fusionGameService';
@@ -103,7 +104,7 @@ export default function FusionRoom() {
           {error && <div className="mt-4 border border-red-500/40 bg-red-950/30 p-3 text-sm text-red-200">{error}</div>}
         </section>
 
-        <aside className="hidden rounded border border-line bg-panel p-4 md:block"><SideContent state={state} act={act}/></aside>
+        <aside className="hidden rounded border border-line bg-panel p-4 md:block"><SideContent state={state} act={act} busy={busy}/></aside>
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-ink/95 p-3 backdrop-blur">
@@ -115,7 +116,7 @@ export default function FusionRoom() {
         </div>
       </div>
 
-      {panel && <div className="fixed inset-x-0 bottom-16 z-30 max-h-[60vh] overflow-auto rounded-t-xl border border-line bg-panel p-5 shadow-2xl md:hidden"><button className="float-right text-faint" onClick={() => setPanel(null)}>关闭</button><SideContent state={state} act={act} roleOnly={panel === 'role'}/></div>}
+      {panel && <div className="fixed inset-x-0 bottom-16 z-30 max-h-[60vh] overflow-auto rounded-t-xl border border-line bg-panel p-5 shadow-2xl md:hidden"><button className="float-right text-faint" onClick={() => setPanel(null)}>关闭</button><SideContent state={state} act={act} busy={busy} roleOnly={panel === 'role'}/></div>}
       {canTalk && <div className="fixed right-3 top-32 z-20 flex max-h-56 w-40 flex-col gap-1 overflow-auto rounded border border-line bg-panel/95 p-2 text-xs md:right-8"><button className={`rounded p-2 text-left ${!target ? 'bg-brass/20 text-brass' : 'text-mist'}`} onClick={() => setTarget(undefined)}>公开发言</button>{state.characters.filter(c => c.id !== state.my_role?.id).map(c => <button key={c.id} className={`rounded p-2 text-left ${target === c.id ? 'bg-brass/20 text-brass' : 'text-mist'}`} onClick={() => setTarget(c.id)}>问 {c.name}</button>)}</div>}
     </div>
   </AppLayout></AuthGuard>;
@@ -124,5 +125,17 @@ export default function FusionRoom() {
 function Stage({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) { return <div><h2 className="font-dossier text-2xl">{title}</h2>{description && <p className="mt-2 mb-6 text-sm leading-6 text-mist">{description}</p>}{children}</div>; }
 function PrivateBlock({ label, children }: { label: string; children?: React.ReactNode }) { return <div className="mt-3 rounded border border-line bg-panel p-4"><p className="mb-2 text-xs text-brass">{label}</p><p className="whitespace-pre-wrap text-sm leading-6 text-mist">{children || '暂无'}</p></div>; }
 function MessageFeed({ events }: { events: FusionEvent[] }) { return <div className="space-y-3">{events.map(event => <div key={event.event_id} className="rounded border border-line bg-panel p-3"><p className="text-xs text-brass">{event.type === 'AI_MESSAGE' ? 'AI 角色' : event.type === 'PHASE_CHANGED' ? '主持人' : '案件记录'}</p><p className="mt-1 whitespace-pre-wrap text-sm text-mist">{String(event.payload.content || event.payload.phase || (event.type === 'EVIDENCE_REVEALED' ? '一条线索被公开' : ''))}</p></div>)}</div>; }
-function SideContent({ state, act, roleOnly = false }: { state: FusionState; act: (type: string, payload?: Record<string, unknown>) => Promise<void>; roleOnly?: boolean }) { return <div>{(!roleOnly && <><h3 className="font-dossier text-lg">我的证据</h3><div className="mt-3 space-y-2">{state.private_evidence.map(evidence => <div key={evidence.id} className="rounded border border-line p-3"><strong className="text-sm">{evidence.name}</strong><p className="mt-1 text-xs leading-5 text-mist">{evidence.description}</p>{evidence.visibility !== 'PUBLIC' && <Button size="sm" variant="outline" className="mt-2 border-brass/40 text-brass" onClick={() => act('reveal_evidence', { evidence_id: evidence.id })}>公开线索</Button>}</div>)}{state.private_evidence.length === 0 && <p className="text-sm text-faint">尚未发现私有线索</p>}</div></>)}<h3 className={`${roleOnly ? '' : 'mt-6'} font-dossier text-lg`}>私人剧本</h3><p className="mt-2 text-sm leading-6 text-mist">{state.my_role?.background || '选择角色后可见'}</p><p className="mt-3 text-xs text-brass">秘密</p><p className="mt-1 text-sm leading-6 text-mist">{state.my_role?.secret || '—'}</p></div>; }
-
+function SideContent({ state, act, busy, roleOnly = false }: {
+  state: FusionState;
+  act: (type: string, payload?: Record<string, unknown>) => Promise<void>;
+  busy: boolean;
+  roleOnly?: boolean;
+}) {
+  return <div>
+    {!roleOnly && <FusionEvidencePanel publicEvidence={state.public_evidence} privateEvidence={state.private_evidence} onReveal={evidenceId => { void act('reveal_evidence', { evidence_id: evidenceId }); }} busy={busy} />}
+    <h3 className={`${roleOnly ? '' : 'mt-6'} font-dossier text-lg`}>私人剧本</h3>
+    <p className="mt-2 text-sm leading-6 text-mist">{state.my_role?.background || '选择角色后可见'}</p>
+    <p className="mt-3 text-xs text-brass">秘密</p>
+    <p className="mt-1 text-sm leading-6 text-mist">{state.my_role?.secret || '—'}</p>
+  </div>;
+}

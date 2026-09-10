@@ -1,15 +1,18 @@
 import sys
 import os
 from decimal import Decimal
-from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from pathlib import Path
+
+from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import sessionmaker
 
-# 加载环境变量
-load_dotenv()
-
 # 将项目根目录添加到Python路径
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(BACKEND_ROOT))
+
+from src.core.environment import load_project_environment
+
+load_project_environment()
 
 from src.db.models.script_model import ScriptDBModel, ScriptStatus
 from src.db.models.character import CharacterDBModel
@@ -19,14 +22,21 @@ from src.db.models.location import LocationDBModel
 from src.db.models.game_phase import GamePhaseDBModel
 from src.schemas.game_phase import GamePhaseEnum
 
-def get_database_url():
+def get_database_url() -> URL:
     """从环境变量获取数据库URL"""
     db_host = os.getenv("DB_HOST", "localhost")
     db_port = os.getenv("DB_PORT", "5432")
     db_name = os.getenv("DB_NAME", "jubensha")
     db_user = os.getenv("DB_USER", "postgres")
     db_password = os.getenv("DB_PASSWORD", "")
-    return f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    return URL.create(
+        "postgresql+psycopg",
+        username=db_user,
+        password=db_password,
+        host=db_host,
+        port=int(db_port),
+        database=db_name,
+    )
 
 def seed_data():
     """填充种子数据"""

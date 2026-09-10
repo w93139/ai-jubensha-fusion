@@ -2,12 +2,17 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.17.0",
+  "engines": {
+    "node": ">=20.9.0 <25",
+    "npm": ">=10 <12"
+  },
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "node scripts/prepare-generated-client.mjs && next build",
+    "build": "next build",
     "start": "next start -p 8009",
-    "lint": "next lint",
-    "check": "next lint",
+    "lint": "eslint src",
+    "check": "eslint src && tsc --noEmit --incremental false",
     "generate-api": "npx openapi-typescript-codegen --input http://localhost:8010/openapi.json --output ./src/client --client axios"
   },
   "dependencies": {

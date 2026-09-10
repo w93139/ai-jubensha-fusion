@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 
 interface DockBarProps {
   className?: string;
+  onExpandedChange?: (expanded: boolean) => void;
 }
 
 interface NavItem {
@@ -22,22 +23,23 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: '/script-center', label: '剧本中心', icon: BookOpen },
-  { href: '/script-manager/create', label: '创建剧本', icon: Plus, requireAuth: true },
-  { href: '/profile/game-history', label: '游戏历史', icon: History, requireAuth: true },
+  { href: '/', label: '首页', icon: BookOpen },
+  { href: '/play/package-preview', label: '开始新游戏', icon: Plus, requireAuth: true },
+  { href: '/play/records', label: '我的记录', icon: History, requireAuth: true },
 ];
 
-const DockBar: React.FC<DockBarProps> = ({ className }) => {
+const DockBar: React.FC<DockBarProps> = ({ className, onExpandedChange }) => {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
   const [expanded, setExpanded] = useState(false);
+  const expand = (value: boolean) => { setExpanded(value); onExpandedChange?.(value); };
 
   const filteredNavItems = navItems.filter(item =>
     !item.requireAuth || isAuthenticated
   );
 
   const isActive = (href: string) =>
-    router.pathname === href || (href !== '/' && router.pathname.startsWith(href));
+    (href === '/' && ['/', '/script-center', '/play'].includes(router.pathname)) || router.pathname === href || (href !== '/' && router.pathname.startsWith(href));
 
   return (
     <div
@@ -48,8 +50,11 @@ const DockBar: React.FC<DockBarProps> = ({ className }) => {
         expanded ? "w-[220px]" : "w-20",
         className
       )}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
+      aria-label="站点导航"
+      onMouseEnter={() => expand(true)}
+      onMouseLeave={event => { if (!event.currentTarget.contains(document.activeElement)) expand(false); }}
+      onFocusCapture={() => expand(true)}
+      onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget) && !event.currentTarget.matches(':hover')) expand(false); }}
     >
       {/* Logo 区域 */}
       <div className="flex h-20 items-center border-b border-line px-4 shrink-0">
@@ -67,7 +72,7 @@ const DockBar: React.FC<DockBarProps> = ({ className }) => {
       </div>
 
       {/* 主要导航区域 */}
-      <div className="flex-1 flex flex-col py-6 space-y-2 px-2">
+      <div className="min-h-0 flex-1 flex flex-col overflow-y-auto overscroll-contain py-6 space-y-2 px-2">
         {filteredNavItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -77,7 +82,7 @@ const DockBar: React.FC<DockBarProps> = ({ className }) => {
               key={item.href}
               href={item.href}
               className={cn(
-                "relative flex h-12 items-center rounded-sm transition-all duration-300",
+                "relative flex h-12 shrink-0 items-center rounded-sm transition-all duration-300",
                 expanded ? "w-full px-3 gap-3" : "w-12 mx-auto justify-center",
                 active
                   ? "bg-brass/15 text-brass border border-brass/30"
@@ -102,7 +107,7 @@ const DockBar: React.FC<DockBarProps> = ({ className }) => {
       </div>
 
       {/* 底部用户菜单 */}
-      <div className="flex flex-col pb-6 border-t border-line pt-4 px-2">
+      <div className="flex shrink-0 flex-col pb-6 border-t border-line pt-4 px-2">
         <div className={cn(
           "flex items-center rounded-sm transition-all duration-300",
           expanded ? "w-full gap-3 px-3" : "w-12 mx-auto justify-center"

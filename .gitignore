@@ -49,7 +49,10 @@ Thumbs.db
 .gitignore.bak
 
 # IDE相关文件
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
@@ -69,3 +72,19 @@ output/
 ehthumbs_vista.db
 Icon?
 Thumbs.db
+# Local secrets, private exports and machine artifacts.
+.env.*
+!.env.example
+!.env.*.example
+._*
+*.tsbuildinfo
+/backups/
+/OCR/
+/OCR文件库/
+*.dump
+*.sqlite3
+*.sparsebundle/
+*.shadow
+/.runtime/
+/.transcripts/
+/.task_outputs/

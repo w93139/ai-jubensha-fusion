@@ -1,0 +1,155 @@
+{
+  "$defs": {
+    "PackageInvestigationTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "action_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Action Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action_id"
+      ],
+      "title": "PackageInvestigationTarget",
+      "type": "object"
+    },
+    "PackagePlayTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "collection": {
+          "enum": [
+            "knowledge",
+            "evidence"
+          ],
+          "title": "Collection",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "collection",
+        "id"
+      ],
+      "title": "PackagePlayTarget",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "SHARE_MATERIAL"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "required": [
+              "collection",
+              "id"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "const": "PERFORM_ACTION"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "required": [
+              "action_id"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "action": {
+            "enum": [
+              "ADVANCE_PHASE",
+              "SETTLE"
+            ]
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "target"
+          ]
+        }
+      }
+    }
+  ],
+  "properties": {
+    "expected_revision": {
+      "minimum": 0,
+      "title": "Expected Revision",
+      "type": "integer"
+    },
+    "idempotency_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Idempotency Key",
+      "type": "string"
+    },
+    "action": {
+      "enum": [
+        "ADVANCE_PHASE",
+        "SHARE_MATERIAL",
+        "SETTLE",
+        "PERFORM_ACTION"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "target": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PackagePlayTarget"
+        },
+        {
+          "$ref": "#/$defs/PackageInvestigationTarget"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target"
+    }
+  },
+  "required": [
+    "expected_revision",
+    "idempotency_key",
+    "action"
+  ],
+  "title": "PackagePlayActionRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -86,6 +86,12 @@ def test_auth_service_password_functions():
         # 测试密码验证
         assert AuthService.verify_password(password, hashed) is True
         assert AuthService.verify_password("wrongpassword", hashed) is False
+        assert hashed.startswith("$argon2")
+
+        # Existing accounts were created with bcrypt; they must keep working.
+        from pwdlib.hashers.bcrypt import BcryptHasher
+        legacy_hash = BcryptHasher().hash(password)
+        assert AuthService.verify_password(password, legacy_hash) is True
     except Exception as e:
         pytest.fail(f"认证服务密码功能测试失败: {e}")
 

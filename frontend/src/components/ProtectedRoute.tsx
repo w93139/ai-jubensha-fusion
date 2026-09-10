@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuthStore } from '@/stores/authStore';
 import { Loader2 } from 'lucide-react';
+import { authReturnPath } from '@/lib/authReturnPath';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     const checkAuth = async () => {
       // 等待认证状态加载完成
-      if (isLoading) {
+      if (isLoading || !router.isReady) {
         return;
       }
 
@@ -29,16 +30,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
       // 如果需要认证但用户未登录，重定向到登录页
       if (requireAuth && !isAuthenticated) {
-        const returnUrl = router.asPath;
-        router.replace(`${redirectTo}?returnUrl=${encodeURIComponent(returnUrl)}`);
+        router.replace({ pathname: redirectTo, query: { returnUrl: authReturnPath(router.asPath) } });
         return;
       }
 
-      // 如果用户已登录但访问认证页面，重定向到首页
+      // 登录后回到原入口，缺省进入剧本中心。
       if (!requireAuth && isAuthenticated && 
           (router.pathname.startsWith('/auth/') || router.pathname === '/auth')) {
-        const returnUrl = router.query.returnUrl as string;
-        router.replace(returnUrl || '/');
+        router.replace(authReturnPath(router.query.returnUrl));
         return;
       }
     };

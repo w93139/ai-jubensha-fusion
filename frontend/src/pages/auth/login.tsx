@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
 import { KeyRound, Send, Smile, Smartphone, Swords, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,18 +12,13 @@ import { toast } from 'sonner';
 const PHONE_RE = /^1[3-9]\d{9}$/;
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { phoneLogin, isLoading, error, isAuthenticated, clearError } = useAuthStore();
+  const { phoneLogin, isLoading, error, clearError } = useAuthStore();
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [nickname, setNickname] = useState('');
   const [sending, setSending] = useState(false);
   const [countdown, setCountdown] = useState(0);
-
-  useEffect(() => {
-    if (isAuthenticated) router.push('/script-center');
-  }, [isAuthenticated, router]);
 
   useEffect(() => {
     if (!countdown) return;
@@ -58,7 +52,6 @@ export default function LoginPage() {
     try {
       await phoneLogin({ phone, code, invite_code: inviteCode.trim() || undefined, nickname: nickname.trim() || undefined });
       toast.success('登录成功，欢迎来到人生海海');
-      router.push('/script-center');
     } catch (loginError) {
       toast.error(loginError instanceof Error ? loginError.message : '登录失败');
     }

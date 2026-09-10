@@ -18,7 +18,8 @@ class FusionConnectionManager:
 
     async def broadcast(self, session_id: str, message: dict):
         stale = []
-        for socket in self.connections.get(session_id, set()):
+        # send_json 会让出控制权；期间连接集合可能被加入/移除，不能跨 await 迭代活集合。
+        for socket in tuple(self.connections.get(session_id, ())):
             try:
                 await socket.send_json(message)
             except Exception:
@@ -28,4 +29,3 @@ class FusionConnectionManager:
 
 
 fusion_connections = FusionConnectionManager()
-

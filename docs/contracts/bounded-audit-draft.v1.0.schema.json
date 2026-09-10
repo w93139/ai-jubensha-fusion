@@ -1,0 +1,159 @@
+{
+  "$defs": {
+    "BoundedFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "category": {
+          "enum": [
+            "PROVENANCE",
+            "TIMELINE",
+            "EVIDENCE",
+            "KNOWLEDGE_BOUNDARY",
+            "PLAYABILITY"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "BLOCKER",
+            "WARNING",
+            "INFO"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/FindingTargetV12"
+        },
+        "message": {
+          "maxLength": 160,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Message",
+          "type": "string"
+        },
+        "source_indexes": {
+          "items": {
+            "maximum": 99,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Source Indexes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "category",
+        "severity",
+        "target",
+        "message",
+        "source_indexes"
+      ],
+      "title": "BoundedFinding",
+      "type": "object"
+    },
+    "FindingTargetV12": {
+      "additionalProperties": false,
+      "properties": {
+        "collection": {
+          "enum": [
+            "introduction",
+            "settlement",
+            "characters",
+            "phases",
+            "knowledge",
+            "evidence",
+            "truth",
+            "mechanics.actions",
+            "mechanics.phase_budgets"
+          ],
+          "title": "Collection",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Id"
+        }
+      },
+      "required": [
+        "collection",
+        "id"
+      ],
+      "title": "FindingTargetV12",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "bounded-audit-draft/1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "summary": {
+      "maxLength": 240,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Summary",
+      "type": "string"
+    },
+    "coverage": {
+      "items": {
+        "enum": [
+          "PROVENANCE",
+          "TIMELINE",
+          "EVIDENCE",
+          "KNOWLEDGE_BOUNDARY",
+          "PLAYABILITY"
+        ],
+        "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 5,
+      "title": "Coverage",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/BoundedFinding"
+      },
+      "maxItems": 10,
+      "title": "Findings",
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "COMPLETE",
+        "INCOMPLETE"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "summary",
+    "coverage",
+    "findings",
+    "status"
+  ],
+  "title": "BoundedAuditDraft",
+  "type": "object"
+}

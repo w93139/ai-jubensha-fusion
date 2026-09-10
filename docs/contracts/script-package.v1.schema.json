@@ -1,0 +1,589 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "KnowledgeItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "FACT",
+            "CLAIM",
+            "INFERENCE"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "PUBLIC",
+            "CHARACTER_PRIVATE"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "character_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Character Id"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseRule"
+        },
+        "disclosure": {
+          "enum": [
+            "PUBLIC",
+            "MAY_SHARE",
+            "MUST_SHARE",
+            "KEEP_PRIVATE"
+          ],
+          "title": "Disclosure",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "kind",
+        "visibility",
+        "character_id",
+        "release",
+        "disclosure",
+        "sources"
+      ],
+      "title": "KnowledgeItem",
+      "type": "object"
+    },
+    "PackageCharacter": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Name",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "sources"
+      ],
+      "title": "PackageCharacter",
+      "type": "object"
+    },
+    "PackageEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "visibility": {
+          "enum": [
+            "PUBLIC",
+            "CHARACTER_PRIVATE"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "character_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Character Id"
+        },
+        "release": {
+          "$ref": "#/$defs/ReleaseRule"
+        },
+        "disclosure": {
+          "enum": [
+            "PUBLIC",
+            "MAY_SHARE",
+            "MUST_SHARE",
+            "KEEP_PRIVATE"
+          ],
+          "title": "Disclosure",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "visibility",
+        "character_id",
+        "release",
+        "disclosure",
+        "sources"
+      ],
+      "title": "PackageEvidence",
+      "type": "object"
+    },
+    "PackagePhase": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Title",
+          "type": "string"
+        },
+        "next_phase_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Phase Id"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "next_phase_id",
+        "sources"
+      ],
+      "title": "PackagePhase",
+      "type": "object"
+    },
+    "ReleaseRule": {
+      "additionalProperties": false,
+      "description": "A phase floor plus AND prerequisites; no executable expressions.",
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "required_public_evidence_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 100,
+          "title": "Required Public Evidence Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "phase_id"
+      ],
+      "title": "ReleaseRule",
+      "type": "object"
+    },
+    "Settlement": {
+      "additionalProperties": false,
+      "properties": {
+        "phase_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Phase Id",
+          "type": "string"
+        },
+        "truth_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "title": "Truth Ids",
+          "type": "array"
+        },
+        "instructions": {
+          "$ref": "#/$defs/SourcedText"
+        }
+      },
+      "required": [
+        "phase_id",
+        "truth_ids",
+        "instructions"
+      ],
+      "title": "Settlement",
+      "type": "object"
+    },
+    "SourceFile": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "relative_path": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "original",
+            "normalized"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "media_type": {
+          "enum": [
+            "application/pdf",
+            "text/plain",
+            "text/markdown",
+            "image/png",
+            "image/jpeg"
+          ],
+          "title": "Media Type",
+          "type": "string"
+        },
+        "original_source_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Original Source Id"
+        },
+        "page_count": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Count"
+        }
+      },
+      "required": [
+        "id",
+        "relative_path",
+        "sha256",
+        "kind",
+        "media_type"
+      ],
+      "title": "SourceFile",
+      "type": "object"
+    },
+    "SourceReference": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "\\S",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        }
+      },
+      "required": [
+        "source_id"
+      ],
+      "title": "SourceReference",
+      "type": "object"
+    },
+    "SourcedText": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "sources"
+      ],
+      "title": "SourcedText",
+      "type": "object"
+    },
+    "TruthItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 40000,
+          "minLength": 1,
+          "pattern": "\\S",
+          "title": "Text",
+          "type": "string"
+        },
+        "visibility": {
+          "const": "SYSTEM_TRUTH",
+          "title": "Visibility",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceReference"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "visibility",
+        "sources"
+      ],
+      "title": "TruthItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "script-package/1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "script_key": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Script Key",
+      "type": "string"
+    },
+    "content_version": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Content Version",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "pattern": "\\S",
+      "title": "Title",
+      "type": "string"
+    },
+    "player_count": {
+      "maximum": 8,
+      "minimum": 2,
+      "title": "Player Count",
+      "type": "integer"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/SourceFile"
+      },
+      "maxItems": 500,
+      "minItems": 1,
+      "title": "Sources",
+      "type": "array"
+    },
+    "introduction": {
+      "$ref": "#/$defs/SourcedText"
+    },
+    "characters": {
+      "items": {
+        "$ref": "#/$defs/PackageCharacter"
+      },
+      "maxItems": 8,
+      "minItems": 2,
+      "title": "Characters",
+      "type": "array"
+    },
+    "initial_phase_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,95}$",
+      "title": "Initial Phase Id",
+      "type": "string"
+    },
+    "phases": {
+      "items": {
+        "$ref": "#/$defs/PackagePhase"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Phases",
+      "type": "array"
+    },
+    "knowledge": {
+      "items": {
+        "$ref": "#/$defs/KnowledgeItem"
+      },
+      "maxItems": 5000,
+      "minItems": 1,
+      "title": "Knowledge",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/PackageEvidence"
+      },
+      "maxItems": 5000,
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    },
+    "truth": {
+      "items": {
+        "$ref": "#/$defs/TruthItem"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "title": "Truth",
+      "type": "array"
+    },
+    "settlement": {
+      "$ref": "#/$defs/Settlement"
+    }
+  },
+  "required": [
+    "schema_version",
+    "script_key",
+    "content_version",
+    "title",
+    "player_count",
+    "sources",
+    "introduction",
+    "characters",
+    "initial_phase_id",
+    "phases",
+    "knowledge",
+    "evidence",
+    "truth",
+    "settlement"
+  ],
+  "title": "ScriptPackage",
+  "type": "object"
+}

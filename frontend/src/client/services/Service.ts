@@ -6,7 +6,7 @@ import type { APIResponse_BatchEditResponse_ } from '../models/APIResponse_Batch
 import type { APIResponse_dict_ } from '../models/APIResponse_dict_';
 import type { APIResponse_Dict_str__Any__ } from '../models/APIResponse_Dict_str__Any__';
 import type { APIResponse_EditResultResponse_ } from '../models/APIResponse_EditResultResponse_';
-import type { APIResponse_list_ScriptCharacter__ } from '../models/APIResponse_list_ScriptCharacter__';
+import type { APIResponse_list_ScriptCharacter__ } from '../models/APIResponse_List_ScriptCharacter__';
 import type { APIResponse_ParsedInstructionsResponse_ } from '../models/APIResponse_ParsedInstructionsResponse_';
 import type { APIResponse_ScriptCharacter_ } from '../models/APIResponse_ScriptCharacter_';
 import type { APIResponse_str_ } from '../models/APIResponse_str_';
