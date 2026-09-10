@@ -1,22 +1,28 @@
 import asyncio
-import uvicorn
-from src.core.server import app
-from dotenv import load_dotenv
 import os
 import logging
+
+import uvicorn
+
+from src.core.environment import load_project_environment
+
+load_project_environment()
+
+from src.core.server import app
 
 def main():
     """启动AI剧本杀游戏服务器"""
 
     
-    # 配置日志
+    # 配置日志：同时输出到终端（方便开发）和文件（方便排查）
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('ai_agent.log', encoding='utf-8')  # 输出到根目录文件
+            logging.StreamHandler(),                                   # 输出到终端 / Docker 日志
+            logging.FileHandler('ai_agent.log', encoding='utf-8'),    # 同时保存到文件
         ],
-        force=True  # 强制重新配置，覆盖已有配置
+        force=True
     )
     
     # 测试日志输出
@@ -34,7 +40,7 @@ def main():
     print("- 精美的Web界面")
     print("="*50)
     
-    host = "0.0.0.0"  # 改为0.0.0.0允许外部访问
+    host = os.getenv("HOST", "127.0.0.1")
     port = int(os.getenv("PORT", 8010))
     reload = os.getenv("RELOAD", "false").lower() == "true"
 
@@ -56,12 +62,6 @@ def main():
     except KeyboardInterrupt:
         print("\n👋 服务器已停止")
 
-def run_next():
-    os.system("cd frontend && npm run dev")
-
-
 if __name__ == "__main__":
-    load_dotenv()
-    # run_next()
     main()
  
