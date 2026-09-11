@@ -104,6 +104,9 @@ export function checkedPlayLibrary(value: unknown): PlayLibrary {
 }
 
 const packagePlayService = {
+  finaleMotivations: (playId: string, signal?: AbortSignal) => data<PackagePlay>(`/package-plays/${encodeURIComponent(playId)}/finale-motivations`, {
+    method: 'POST', signal,
+  }),
   library: async (offset = 0, limit = 12, signal?: AbortSignal): Promise<PlayLibrary> => {
     if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(limit) || limit < 1 || limit > 50) throw new Error('无效的记录页码。');
     return checkedPlayLibrary(await data<unknown>(`/package-play-library?offset=${offset}&limit=${limit}`, { signal }));

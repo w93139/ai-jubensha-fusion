@@ -149,3 +149,28 @@ def test_package_play_http_invalid_ask_never_dispatches(play_http, patch):
                            headers={'Authorization': 'Bearer player'})
     assert response.status_code == 422 and response.headers['Cache-Control'] == 'no-store'
     service.ask.assert_not_awaited()
+
+
+@pytest.mark.parametrize('token,status', [(None, 401), ('disabled', 403)])
+def test_finale_continuation_requires_active_actor(play_http, token, status):
+    client, service = play_http
+    r = client.post('/api/fusion/package-plays/play-x/finale-motivations',
+        headers={'Authorization': 'Bearer ' + token} if token else {})
+    assert r.status_code == status and service.mock_calls == []
+
+
+@pytest.mark.parametrize('entry', ['actions', 'guided', 'finale-motivations'])
+def test_finale_http_automatic_continuation_and_owner(play_http, entry):
+    client, service = play_http
+    ready = {'play_id':'play-x','finale_motivation':{'complete':False}}
+    done = {'play_id':'play-x','finale_motivation':{'complete':True}}
+    service.complete_finale_motivations = AsyncMock(return_value=done)
+    service.act.return_value = ready; service.guided.return_value = ready
+    body = {'expected_revision': 1, 'idempotency_key':'next', 'action':'ADVANCE_PHASE'}
+    if entry == 'guided': body = {'schema_version':'package-guided-command/1.0', 'expected_revision':1, 'idempotency_key':'next','action':'FINISH_INVESTIGATION'}
+    r = client.post('/api/fusion/package-plays/play-x/' + entry,
+        headers={'Authorization':'Bearer player'}, **({'json':body} if entry != 'finale-motivations' else {}))
+    assert r.status_code == 200 and r.json()['data'] == done
+    assert r.headers['Cache-Control'] == 'no-store'
+    service.complete_finale_motivations.assert_awaited_once_with('play-x', 2)
+    if entry != 'finale-motivations': service.db.commit.assert_called_once()

@@ -54,6 +54,8 @@ from src.fusion.package_single_player import SINGLE_POLICY, topic_response_reque
 from src.fusion.package_role_content import resolve_role_content, role_content_required
 from src.fusion.topic_answer_checks import (BASIS_VERSION, BASIS_GUIDANCE, DISCLOSURE_VERSION,
                                             DISCLOSURE_GUIDANCE, validate_topic_answer)
+from src.fusion.finale_motivation import FinaleMotivationMixin, FINALE_BINDING_CONTRACT, unfinished
+from src.fusion.package_dialogue_model import FINALE_MOTIVATION_POLICY, FINALE_MOTIVATION_POLICIES, validate_finale_motivation
 
 
 BINDING_CONTRACT = "package-text-play-binding/1.0"
@@ -101,6 +103,9 @@ class Replay:
     host_hint_entries: list = field(default_factory=list)
     topic_turns: list = field(default_factory=list)
     topic_commands: list = field(default_factory=list)
+    finale_speeches: list = field(default_factory=list)
+    finale_model: dict | None = None
+    finale_policy: str = FINALE_MOTIVATION_POLICY
     # HTTP-only index; deliberately absent from state() and historical hashes.
     workspace_index: dict = field(default_factory=dict)
 
@@ -134,6 +139,9 @@ class Replay:
                                'retellings': self.scripted_retells, 'hints': self.host_hint_entries}
         if self.topic_commands:
             result['single_player'] = {'turns': self.topic_turns, 'commands': self.topic_commands}
+        if self.finale_speeches:
+            result['finale_motivation'] = {'policy': self.finale_policy,
+                'speeches': self.finale_speeches, 'model': self.finale_model}
         return result
 
     def reserved(self) -> UsageAmount:
@@ -143,7 +151,7 @@ class Replay:
         return result
 
 
-class PackagePlayService:
+class PackagePlayService(FinaleMotivationMixin):
     def __init__(self, db: Session, publisher: PublicationReader | None = None,
                  model: PackageRoleModel | None = None, policy: BudgetPolicy | None = None,
                  now=None, proposal_model: PackageProposalModel | None = None,
@@ -151,7 +159,8 @@ class PackagePlayService:
                  full_input_bytes: int = 65536, full_table_output_tokens: int = 4096,
                  speech_policy: str = 'role-speech/1.0', table_policy: str = 'package-table-model/1.0',
                  include_interactions: bool = False, request_scope_policy: str | None = None,
-                 presentation_repair=None, guided_content=None, single_player_content=None, single_player_required=None):
+                 presentation_repair=None, guided_content=None, single_player_content=None, single_player_required=None,
+                 finale_policy=None):
         if type(include_interactions) is not bool:
             raise PackagePlayError('PACKAGE_PLAY_VIEW_POLICY_INVALID')
         if request_scope_policy not in (None, REQUEST_SCOPE_POLICY):
@@ -178,6 +187,7 @@ class PackagePlayService:
         self.full_output = {'schema_version': 'full-play-table-output-policy/1.0', 'max_output_tokens': full_table_output_tokens}
         settings = getattr(self.model, 'settings', None)
         full_settings = replace(settings, max_input_bytes=full_input_bytes) if settings is not None else None
+        self._setup_finale_motivation(finale_policy, full_settings)
         if table_policy not in ('package-table-model/1.0', 'package-table-model/1.1'):
             raise PackagePlayError('FULL_PLAY_TABLE_POLICY_INVALID')
         table_type = BoundPackageTableModel if table_policy == 'package-table-model/1.1' else PackageTableModel
@@ -279,13 +289,17 @@ class PackagePlayService:
                         or type(full['max_input_bytes']) is not int or not 1024 <= full['max_input_bytes'] <= 98304):
                     raise ValueError
                 expected.update(schema_version=binding['schema_version'], full_input=full)
-                if binding['schema_version'] == FULL_BINDING_CONTRACT:
+                if binding['schema_version'] in (FULL_BINDING_CONTRACT, FINALE_BINDING_CONTRACT):
                     output = binding['full_output']
                     if (set(output) != {'schema_version', 'max_output_tokens'}
                             or output['schema_version'] != 'full-play-table-output-policy/1.0'
                             or type(output['max_output_tokens']) is not int or not 64 <= output['max_output_tokens'] <= 4096):
                         raise ValueError
                     expected['full_output'] = output
+                    if binding['schema_version'] == FINALE_BINDING_CONTRACT:
+                        if binding.get('finale_motivation_policy') not in FINALE_MOTIVATION_POLICIES:
+                            raise ValueError
+                        expected['finale_motivation_policy'] = binding['finale_motivation_policy']
                 elif binding['schema_version'] != 'package-text-play-binding/1.1':
                     raise ValueError
             if (binding != expected or content_hash(request) != row.request_hash
@@ -353,6 +367,8 @@ class PackagePlayService:
                        "initial_state_hash": content_hash(state.state())}
             if isinstance(state.engine, PackageFullPlayRules):
                 binding.update(schema_version=FULL_BINDING_CONTRACT, full_input=self.full_input.copy(), full_output=self.full_output.copy())
+                if self.finale_policy is not None:
+                    binding.update(schema_version=FINALE_BINDING_CONTRACT, finale_motivation_policy=self.finale_policy)
             row = ScriptPackagePlay(**{key: binding[key] for key in (
                 "play_id", "owner_user_id", "opening_session_id", "release_id", "version_id", "package_hash",
                 "selected_character_id", "request_hash")}, idempotency_key=request["idempotency_key"],
@@ -391,6 +407,10 @@ class PackagePlayService:
         return UsageAmount(prompt, completion, cached, cost, usage["reasoning_tokens"])
 
     def _consume(self, state: Replay, kind: str, request: dict, data: dict, binding: dict) -> None:
+        if self._consume_finale_motivation(state, kind, request, data, binding):
+            return
+        if request.get('action') == 'SEAL_FINALE' and unfinished(state):
+            raise PlayRulesError('FINALE_MOTIVATIONS_PENDING')
         if kind == 'ACTION' and request.get('schema_version') == 'package-topic-command/1.0':
             if (request != self._request(request, TopicCommand) or request['expected_revision'] != state.revision
                     or not isinstance(state.engine, PackageFullPlayRules) or state.pending):
@@ -745,7 +765,7 @@ class PackagePlayService:
             if package["schema_version"] in ("script-package/1.2", "script-package/1.3", 'script-package/1.4'):
                 limit += len(package["mechanics"]["actions"])
             if isinstance(state.engine, PackageFullPlayRules):
-                limit = 2000
+                limit = 2009 if binding.get('finale_motivation_policy') in FINALE_MOTIVATION_POLICIES else 2000
             events = self.db.query(ScriptPackagePlayEvent).filter_by(play_id=row.play_id).order_by(ScriptPackagePlayEvent.revision).populate_existing().yield_per(100)
             for event in events:
                 if (type(event.revision) is not int or event.revision != state.revision + 1 or event.revision > limit
@@ -756,6 +776,10 @@ class PackagePlayService:
                 if event.idempotency_key != self._key(event.kind, request):
                     raise ValueError
                 self._consume(state, event.kind, request, payload["data"], binding)
+                if binding.get('finale_motivation_policy') in FINALE_MOTIVATION_POLICIES:
+                    finale_slots = self._finale_event_count(state)
+                    if finale_slots > 9 or event.revision - finale_slots > 2000:
+                        raise ValueError
                 expected = {"schema_version": self._event_contract(state), "play_id": row.play_id, "revision": event.revision,
                             "kind": event.kind, "request_hash": event.request_hash,
                             "previous_event_hash": state.previous, "state_hash": content_hash(state.state()), "data": payload["data"]}
@@ -998,7 +1022,17 @@ class PackagePlayService:
             if not pausing and ((full['phone_busy'] and not full['call'] and not closing_result)
                     or request.get('schema_version')=='package-phone-command/1.0' or opening_result):
                 needed+=1
-            if state.revision + needed > 2000:
+            # Nine slots belong exclusively to the opt-in START + four request/result
+            # pairs. They cannot consume the legacy 2000 action/result slots.
+            finale_slots = 0
+            motivation_event = False
+            if binding.get('finale_motivation_policy') in FINALE_MOTIVATION_POLICIES:
+                finale_slots = self._finale_event_count(state)
+                motivation_event = (request.get('schema_version') in (
+                    'package-finale-motivation-start/1.0', 'package-finale-motivation-command/1.0')
+                    or (kind == 'AI_RESULT' and state.pending.get(request.get('request_id'), {}).get('operation') == 'FINALE_MOTIVATION'))
+            if ((motivation_event and finale_slots + (2 if kind == 'AI_REQUEST' else 1) > 9)
+                    or (not motivation_event and state.revision - finale_slots + needed > 2000)):
                 raise PackagePlayError('FULL_PLAY_EVENT_LIMIT')
         self._consume(state, kind, request, data, binding)
         payload = {"schema_version": self._event_contract(state), "play_id": row.play_id, "revision": state.revision + 1,
@@ -1024,12 +1058,17 @@ class PackagePlayService:
 
     def _view(self, row, package: dict, binding: dict, state: Replay) -> dict:
         projection = state.engine.view()
+        # Historical bindings retain their frozen response shape.
+        if binding.get('finale_motivation_policy') not in FINALE_MOTIVATION_POLICIES:
+            old_result = projection.get('full_game', {}).get('result')
+            if old_result is not None:
+                old_result.pop('vote_disclosure', None)
         reserved = state.reserved()
         reason = self._model_reason(binding)
         if projection["settled"]:
             reason = "SETTLED"
         elif isinstance(state.engine, PackageFullPlayRules) and projection['full_game']['phase_kind'] == 'FINALE':
-            reason = 'FINALE_SEALING'
+            reason = 'FINALE_MOTIVATIONS_PENDING' if unfinished(state) else 'FINALE_SEALING'
         elif state.questions >= self._question_limit(state):
             reason = "QUESTION_LIMIT"
         proposal_reason = reason or self._proposal_reason(binding, state)
@@ -1055,6 +1094,8 @@ class PackagePlayService:
             table_reason = self._table_reason(binding, state)
             if projection['settled']:
                 table_reason = 'SETTLED'
+            elif unfinished(state):
+                table_reason = 'FINALE_MOTIVATIONS_PENDING'
             elif state.questions >= self._question_limit(state):
                 table_reason = 'QUESTION_LIMIT'
             choices = []
@@ -1073,6 +1114,17 @@ class PackagePlayService:
             response_view['table_decisions'] = {'schema_version': 'package-table-decision-view/1.0',
                 'available': table_reason is None, 'reason': table_reason, 'options': choices,
                 'requests': state.table_requests}
+            if state.finale_speeches:
+                response_view['finale_speeches'] = [{k: e[k] for k in ('character_id', 'text')} for e in state.finale_speeches]
+                response_view['finale_motivation'] = {'policy': binding['finale_motivation_policy'],
+                    'complete': not unfinished(state), 'pending': bool(state.pending),
+                    'completed_count': sum(e['status'] in ('DONE', 'EMPTY') for e in state.finale_speeches)}
+            if (binding.get('finale_motivation_policy') in FINALE_MOTIVATION_POLICIES
+                    and projection['full_game']['finale'] and projection['full_game']['finale']['all_sealed']):
+                disclosure = state.engine.vote_disclosure(response_view.get('finale_speeches', []))
+                projection['full_game']['finale']['vote_disclosure'] = disclosure
+                if projection['full_game']['result'] is not None:
+                    projection['full_game']['result']['vote_disclosure'] = deepcopy(disclosure)
             call = projection['full_game']['call']
             reply_options = []
             if call and not projection['settled']:
@@ -1315,6 +1367,7 @@ class PackagePlayService:
                     advance = {'action': 'ADVANCE_PHASE', 'expected_revision': state.revision,
                         'idempotency_key': content_hash({'guided_finish': request['idempotency_key'], 'play': identifier})}
                     self._append(row, binding, state, 'ACTION', advance, {})
+                self._start_finale_motivation(row, binding, state)
             return self._view(row, package, binding, state)
         except PlayRulesError as exc:
             raise PackagePlayError(exc.code) from None
@@ -1459,6 +1512,7 @@ class PackagePlayService:
             with self.db.begin_nested():
                 self._append(row, binding, state, "ACTION", request, {})
                 self._present_required(row, binding, state)
+                self._start_finale_motivation(row, binding, state)
             return self._view(row, package, binding, state)
         except PlayRulesError as exc:
             raise PackagePlayError(exc.code) from None
@@ -1583,7 +1637,7 @@ class PackagePlayService:
         if turn is None or topic_status(turn,state) != 'READY':
             raise PackagePlayError('SINGLE_TOPIC_REQUIRED')
 
-    def _record_result(self, row, binding, state, request_id, status, refs, usage, proposal=None, speech=None, decision=None):
+    def _record_result(self, row, binding, state, request_id, status, refs, usage, proposal=None, speech=None, decision=None, motivation=None):
         accounted = self._account(state.policy, state.pending[request_id]["reservation"], usage)
         request = {"idempotency_key": request_id, "request_id": request_id}
         data = {"status": status, "refs": refs, "usage": usage,
@@ -1594,6 +1648,8 @@ class PackagePlayService:
             data["speech"] = speech
         if state.pending[request_id].get('operation') in ('DECIDE','PHONE'):
             data['decision'] = decision
+        if state.pending[request_id].get('operation') == 'FINALE_MOTIVATION':
+            data['motivation'] = motivation
         self._append(row, binding, state, "AI_RESULT", request, data)
 
     def _finish(self, identifier: str, request_id: str, owner: int, result, expired=False) -> dict:
@@ -1620,6 +1676,7 @@ class PackagePlayService:
             responding = private or pending.get("operation") == "RESPOND"
             calling = pending.get('operation') == 'PHONE'
             deciding = calling or pending.get('operation') == 'DECIDE'
+            motivating = pending.get('operation') == 'FINALE_MOTIVATION'
             usage = result.get("usage") if type(result) is dict else None
             if result is not None and result.get("model_attempted") is False:
                 usage = UsageAmount().to_metadata()
@@ -1627,11 +1684,11 @@ class PackagePlayService:
                 self._account(state.policy, pending["reservation"], usage)
             except (ValueError, TypeError, KeyError):
                 usage = None
-            status, refs, proposal, speech, decision = "UNKNOWN", [], None, None, None
+            status, refs, proposal, speech, decision, motivation = "UNKNOWN", [], None, None, None, None
             if expired:
                 status, usage = "EXPIRED", None
             elif result and result.get("status") == "OK" and usage is not None:
-                reason = (self._phone_reason(binding,state) if calling else self._table_reason(binding, state) if deciding else self._dialogue_reason(binding, state) if responding else self._proposal_reason(binding, state)
+                reason = (self._finale_reason(binding) if motivating else self._phone_reason(binding,state) if calling else self._table_reason(binding, state) if deciding else self._dialogue_reason(binding, state) if responding else self._proposal_reason(binding, state)
                           if proposing else self._model_reason(binding))
                 if (not current or reason is not None or state.revision != pending["revision"]
                         or self.now() > pending["expires_at"] or state.engine.view()["settled"]):
@@ -1640,7 +1697,13 @@ class PackagePlayService:
                     # Validate atomically on a copy before appending authoritative state.
                     from copy import deepcopy
                     try:
-                        if calling:
+                        if motivating:
+                            context = self._finale_context(state, binding, pending['character_id'], pending['revision'] - 1)
+                            if content_hash(context) != pending['context_hash']:
+                                raise ValueError
+                            motivation = validate_finale_motivation(result.get('motivation'), context)
+                            status = 'OK'
+                        elif calling:
                             context=self._phone_context(state,binding,pending['revision']-1,pending=pending)
                             candidate=validate_call(result.get('decision'),context,pending['model']['schema_version'])
                             deepcopy(state.engine).apply_phone(pending['character_id'],candidate,state.revision+1)
@@ -1666,10 +1729,10 @@ class PackagePlayService:
                             deepcopy(state.engine).apply_reply(pending["character_id"], result.get("refs"))
                             status, refs = "OK", result["refs"]
                     except (PlayRulesError, ValueError, TypeError, KeyError):
-                        status, speech, proposal, decision = "INVALID", None, None, None
+                        status, speech, proposal, decision, motivation = "INVALID", None, None, None, None
             elif usage is not None:
                 status = "INVALID"
-            self._record_result(row, binding, state, request_id, status, refs, usage, proposal, speech, decision)
+            self._record_result(row, binding, state, request_id, status, refs, usage, proposal, speech, decision, motivation)
             # A paid result is durable before any optional authored continuation.
             self.db.commit()
             if status == 'OK' and current and self._guided_catalog(binding) is not None:

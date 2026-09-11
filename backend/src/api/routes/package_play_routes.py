@@ -20,7 +20,8 @@ router = APIRouter(prefix="/api/fusion", tags=["角色材料问答与结尾"])
 
 def play_service(actor: User = Depends(active_user), db: Session = Depends(get_db_session)) -> PackagePlayService:
     return PackagePlayService(db, speech_policy='role-speech/1.10', table_policy='package-table-model/1.1',
-                              include_interactions=True, request_scope_policy='package-request-scope/1.0')
+                              include_interactions=True, request_scope_policy='package-request-scope/1.0',
+                              finale_policy='finale-motivation/1.1')
 
 
 def _fail(exc: PackagePlayError) -> NoReturn:
@@ -149,7 +150,11 @@ async def act_play(play_id: str, request: Request, response: Response,
     body = await _body(request, PackagePlayActionRequest)
     response.headers.update(NO_STORE)
     try:
-        return {"success": True, "data": service.act(play_id, body, actor.id)}
+        view = service.act(play_id, body, actor.id)
+        if view.get('finale_motivation') and not view['finale_motivation']['complete']:
+            service.db.commit()
+            view = await service.complete_finale_motivations(play_id, actor.id)
+        return {"success": True, "data": view}
     except PackagePlayError as exc:
         _fail(exc)
 
@@ -221,7 +226,11 @@ async def guided_play(play_id: str, request: Request, response: Response,
     body = await _body(request, GuidedPlayRequest)
     response.headers.update(NO_STORE)
     try:
-        return {'success': True, 'data': service.guided(play_id, body, actor.id)}
+        view = service.guided(play_id, body, actor.id)
+        if view.get('finale_motivation') and not view['finale_motivation']['complete']:
+            service.db.commit()
+            view = await service.complete_finale_motivations(play_id, actor.id)
+        return {'success': True, 'data': view}
     except PackagePlayError as exc:
         _fail(exc)
 
@@ -234,5 +243,16 @@ async def topic_play(play_id: str, request: Request, response: Response,
     response.headers.update(NO_STORE)
     try:
         return {'success': True, 'data': service.topic(play_id, body, actor.id)}
+    except PackagePlayError as exc:
+        _fail(exc)
+
+
+@router.post('/package-plays/{play_id}/finale-motivations')
+async def complete_finale_motivations(play_id: str, request: Request, response: Response,
+                                     service: PackagePlayService = Depends(play_service)) -> dict:
+    actor = active_user(request)
+    response.headers.update(NO_STORE)
+    try:
+        return {'success': True, 'data': await service.complete_finale_motivations(play_id, actor.id)}
     except PackagePlayError as exc:
         _fail(exc)

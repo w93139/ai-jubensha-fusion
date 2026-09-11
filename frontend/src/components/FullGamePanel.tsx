@@ -61,6 +61,26 @@ export function validFullGame(view: PackagePlay): boolean {
         && g.points !== null && finite(g.points) && g.points <= g.max_points && Array.isArray(g.parts)
         && g.parts.every(p => typeof p.id === 'string' && finite(p.max_points) && p.points !== null && finite(p.points)
           && p.points <= p.max_points && (p.explanation === null || typeof p.explanation === 'string'))))) return false;
+    if ((view.finale_speeches === undefined) !== (view.finale_motivation === undefined)) return false;
+    if (view.finale_motivation) {
+      const progress = view.finale_motivation;
+      if (full.phase_kind !== 'FINALE' || !['finale-motivation/1.0', 'finale-motivation/1.1'].includes(progress.policy)
+        || typeof progress.complete !== 'boolean' || typeof progress.pending !== 'boolean'
+        || !finite(progress.completed_count) || progress.completed_count > 4
+        || progress.complete !== (progress.completed_count === 4) || (progress.pending && progress.complete)
+        || !Array.isArray(view.finale_speeches) || view.finale_speeches.length !== 4
+        || new Set(view.finale_speeches.map(entry => entry.character_id)).size !== 4
+        || !view.finale_speeches.every(entry => seat(entry.character_id) && entry.character_id !== view.selected_character_id
+          && typeof entry.text === 'string' && Array.from(entry.text).length <= 60)) return false;
+    }
+    for (const rows of [full.finale?.vote_disclosure, full.result?.vote_disclosure]) {
+      if (rows !== undefined && (!full.finale?.all_sealed || !Array.isArray(rows) || rows.length !== 5
+        || new Set(rows.map(row => row.character_id)).size !== 5
+        || !rows.every(row => seat(row.character_id) && (row.voted_for === null || typeof row.voted_for === 'string')
+          && typeof row.voted_for_label === 'string' && Boolean(row.voted_for_label.trim())
+          && typeof row.motivation === 'string' && Array.from(row.motivation).length <= 60
+          && row.motivation === (view.finale_speeches?.find(entry => entry.character_id === row.character_id)?.text || '')))) return false;
+    }
     const decisions = view.table_decisions;
     if (view.table_commands && (!Array.isArray(view.table_commands)
       || new Set(view.table_commands.map(r => r.request_id)).size !== view.table_commands.length
@@ -131,7 +151,8 @@ export default function FullGamePanel({ view, locked, onTable, onDecide, onPriva
   if (!view.full_game || !validFullGame(view)) return null;
   const full = view.full_game;
   const name = (id: string) => view.characters.find(c => c.id === id)?.name || id;
-  const disabled = locked || view.pending_ai || view.settled || !onTable;
+  const disabled = locked || view.pending_ai || view.settled || !onTable
+    || Boolean(view.finale_motivation && !view.finale_motivation.complete);
   const privateLength = Array.from(privateText.trim()).length;
   const privateClarification = questionRefusal(privateText) || questionClarification(privateText);
   const canSendPrivate = !view.single_player && !disabled && !privateClarification && privateLength > 0 && privateLength <= 1000;
@@ -202,6 +223,14 @@ export default function FullGamePanel({ view, locked, onTable, onDecide, onPriva
         {view.phone_turns.requests.slice(-3).map(r => <p key={r.request_id} className="text-sm">电话进度：{statusText[r.status]}</p>)}
       </div>}
     </section>}
+    {(section === 'all' || section === 'finale') && view.finale_speeches && <section aria-label="封卷前看法" className={box}>
+      <h2 className="text-lg font-semibold">封卷前看法</h2>
+      <p className="text-sm leading-7 text-mist">这是各角色在封卷前的怀疑，实际投票将在所有人封卷后公示。</p>
+      {!view.finale_motivation?.complete && <p role="status" className="text-sm text-brass">正在听取其他角色的看法（{view.finale_motivation?.completed_count || 0}/4）…</p>}
+      <ul className="space-y-3">{view.finale_speeches.map(entry => <li key={entry.character_id} className="break-words text-sm leading-7">
+        <span className="font-semibold">{name(entry.character_id)}：</span>{entry.text || (view.finale_motivation?.complete ? '未发表看法。' : '等待看法。')}
+      </li>)}</ul>
+    </section>}
     {(section === 'all' || section === 'finale') && !view.settled && finale && <section id="play-finale" aria-label="我的终局答卷" className={box}>
       <h2 className="text-lg font-semibold">我的终局答卷</h2><p>已封卷 {finale.votes.sealed_count} / 5</p>
       <p className="text-sm leading-7 text-mist">答案由既定规则核算分数，不由 AI 自由打分。每题需作答或明确选择不确定；指认和信任也需选择。一起封存后不能修改，所有人提交后才能揭晓。</p>
@@ -231,6 +260,14 @@ export default function FullGamePanel({ view, locked, onTable, onDecide, onPriva
         {finaleVotesNeedsConfirmation && <p className="text-sm leading-6 text-brass">原请求已停止等待。确认后会为每个尚未提交的角色发起一次新互动，已封存的答卷保留。</p>}
         {finaleVotesProgress && <p role="status" className="text-sm text-mist">{finaleVotesProgress}</p>}
       </div>
+    </section>}
+    {(section === 'all' || section === 'finale') && finale?.all_sealed && finale.vote_disclosure && <section aria-label="投票公示" className={box}>
+      <h2 className="text-lg font-semibold">投票公示</h2>
+      <p className="text-sm text-mist">以下为实际正式票，后附该角色封卷前的看法。</p>
+      <ul className="space-y-3">{finale.vote_disclosure.map(row => <li key={row.character_id} className="break-words text-sm leading-7">
+        <span className="font-semibold">{name(row.character_id)}</span>{row.voted_for === null ? ' 弃权' : ` 投票给 ${row.voted_for_label}`}
+        {row.motivation && <span> — {row.motivation}</span>}
+      </li>)}</ul>
     </section>}
     {(section === 'all' || section === 'finale') && !view.settled && view.table_decisions && (view.table_decisions.options.length > 0 || view.table_decisions.requests.length > 0) && <section aria-label="AI 正式提交" className={box}>
       <h2 className="text-lg font-semibold">其他角色的决定</h2><p className="text-sm text-mist">{onFinaleVotes && full.phase_kind === 'FINALE' ? '终局使用上方“请其他角色一起提交”。角色按自己的已知信息依次提交；失败时停止，保留已提交的结果。' : '让角色按自己的已知信息提交；提交失败会保留未提交状态。'}</p>

@@ -19,6 +19,8 @@ export type PackagePlayMechanics = {
 };
 
 export type PackagePlay = {
+  finale_speeches?: { character_id: string; text: string }[];
+  finale_motivation?: { policy: 'finale-motivation/1.0' | 'finale-motivation/1.1'; complete: boolean; pending: boolean; completed_count: number };
   post_game_qa?: { schema_version: 'package-post-game-qa/1.0'; questions: { id: string; title: string; text: string }[] };
   single_player?: SinglePlayerView;
   round_workspace?: RoundWorkspace;
@@ -192,6 +194,8 @@ export type FullPrivateReplyRequest = {
 };
 export type FullPhoneRequest = { schema_version: 'package-phone-command/1.0'; action: 'PHONE_STEP'; expected_revision: number; idempotency_key: string };
 export type FullPhonePauseRequest = { schema_version: 'package-phone-pause-command/1.0'; action: 'PAUSE_PHONE'; expected_revision: number; idempotency_key: string };
+export type VoteDisclosure = { character_id: string; voted_for: string | null; voted_for_label: string; motivation: string };
+
 export type FullGameView = {
   schema_version: 'full-game-view/1.0'; phase_kind: 'READING' | 'INVESTIGATION' | 'FINALE';
   can_open_ballot: boolean; phone_busy: boolean;
@@ -202,12 +206,14 @@ export type FullGameView = {
     choices: { id: string; label: string; cost: number }[];
     ballot: FullBallot | null; status: 'WAITING' | 'TIE' | 'CHOSEN' | 'SKIPPED'; choice_id: string | null; tied_choice_ids: string[] } | null;
   finale: {
+    vote_disclosure?: VoteDisclosure[];
     schema_version: 'structured-finale-view/1.0'; sealed: boolean; all_sealed: boolean; submission: FullSubmission | null;
     questions: { id: string; prompt: string; options: { id: string; label: string }[]; max_choices: number }[];
     votes: { schema_version: 'finale-vote-view/1.0'; sealed_count: number; required_count: number;
       ballot: FullSubmission['vote'] | null; accusation_options: { id: string; label: string }[]; trust_character_ids: string[] };
   } | null;
   result: {
+    vote_disclosure?: VoteDisclosure[];
     totals: { character_id: string; total_points: number | null; known_points: number; max_points: number }[];
     goals: { id: string; character_id: string; title: string; points: number | null; max_points: number;
       parts: { id: string; points: number | null; max_points: number; explanation: string | null; status: 'ASSESSED' | 'UNASSESSED' }[] }[];

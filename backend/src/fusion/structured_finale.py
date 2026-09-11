@@ -123,7 +123,16 @@ class StructuredFinale:
         return _any(_all(None if facts[t['fact_id']] is None else facts[t['fact_id']] == t['expected']
                          for t in clause) for clause in condition)
 
-    def result(self) -> dict:
+    def vote_disclosure(self, finale_speeches=()) -> list[dict]:
+        if len(self._sheets) != 5:
+            raise StructuredFinaleError('FINALE_NOT_ALL_SEALED')
+        labels = {i['id']: i['label'] for i in self._plan['votes']['identities']}
+        statements = {entry['character_id']: entry['text'] for entry in finale_speeches}
+        return [{'character_id': actor, 'voted_for': self._sheets[actor]['vote']['accusation_id'],
+                 'voted_for_label': labels.get(self._sheets[actor]['vote']['accusation_id'], '弃权'),
+                 'motivation': statements.get(actor, '')} for actor in self._seats]
+
+    def result(self, finale_speeches=()) -> dict:
         """Host-only evaluation. Public reveal is a separate, authorized action."""
         if len(self._sheets) != 5:
             raise StructuredFinaleError('FINALE_NOT_ALL_SEALED')
@@ -203,4 +212,5 @@ class StructuredFinale:
                            'unassessed_parts': sum(p['points'] is None for p in parts)})
         complete = all(t['unassessed_parts'] == 0 for t in totals) and all(e['status'] == 'DETERMINED' for e in endings)
         return {'schema_version': 'structured-finale-result/1.0', 'plan_hash': self.plan_hash,
-                'complete': complete, 'facts': facts, 'votes': votes, 'goals': rows, 'totals': totals, 'endings': endings}
+                'complete': complete, 'facts': facts, 'votes': votes, 'goals': rows, 'totals': totals, 'endings': endings,
+                'vote_disclosure': self.vote_disclosure(finale_speeches)}

@@ -347,6 +347,11 @@ class PackageFullPlayRules(PackageMemoryRules):
                     'heard_terms': {actor: sorted(terms) for actor, terms in self._heard_terms.items()},
                     'finale': self._finale.state() if self._finale else None}}
 
+    def vote_disclosure(self, finale_speeches=()):
+        if self._finale is None:
+            raise PlayRulesError('FULL_PLAY_FINALE_NOT_READY')
+        return self._finale.vote_disclosure(finale_speeches)
+
     def view(self):
         result = super().view()
         for item in result['private_knowledge']:

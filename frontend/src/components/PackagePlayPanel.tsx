@@ -949,6 +949,36 @@ export function PackagePlayWorkspace({ playId, openingSessionId, onCreated }: Pl
     return () => managed.current.active?.abort();
   }, []);
 
+  useEffect(() => {
+    if (!view || loading || requiresRefresh || view.settled || !view.finale_motivation
+      || view.finale_motivation.complete || !matchesPlayRoute(view, playId, openingSessionId)) return;
+    const requests = managed.current;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      if (requests.active || controller.signal.aborted) return;
+      requests.active = controller; setBusy(true); setError('');
+      try {
+        const result = await packagePlayService.finaleMotivations(view.play_id, controller.signal);
+        if (controller.signal.aborted) return;
+        if (!samePlayBinding(view, result) || result.revision < (requests.observed?.revision ?? view.revision) || !matchesPlayRoute(result, playId, openingSessionId))
+          throw new PackagePlayError(409, '终局记录与当前角色或进度不一致，请刷新核对。');
+        requests.observed = result; setView(result);
+      } catch (cause) {
+        if (!controller.signal.aborted) {
+          if (cause instanceof PackagePlayError && [401, 403, 404].includes(cause.status)) {
+            requests.observed = undefined; setView(undefined);
+          }
+          setError(cause instanceof PackagePlayError ? cause.message : '终局看法尚未读取完整，请刷新进度核对。');
+          setRequiresRefresh(true);
+        }
+      } finally {
+        if (requests.active === controller) requests.active = undefined;
+        if (!controller.signal.aborted) setBusy(false);
+      }
+    }, view.finale_motivation.pending ? 2000 : 0);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [view, loading, requiresRefresh, playId, openingSessionId, notebookOwner]);
+
   const failure = (cause: unknown) => {
     setError(cause instanceof PackagePlayError ? cause.message : '保存失败，请重试；相同操作会复用本次请求标识。');
     if (cause instanceof PackagePlayError && cause.status === 409) setRequiresRefresh(true);

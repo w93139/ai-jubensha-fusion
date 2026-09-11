@@ -3400,3 +3400,74 @@ test('settled private history allows peer filtering but no new call or message',
  const run=()=>runner.run(()=>C({view:v,locked:false,onTable:a=>sent.push(a),section:'private'}));
  try{let tree=run();const select=elements(tree,'PlaySelect')[0];assert.equal(select.props.disabled,false);select.props.onChange('fictional-b');tree=run();assert.equal(elements(elements(tree,'div').find(n=>n.props.role==='log'),'PlayText')[0].props.text,'虚构b私聊');assert.equal(button(tree,'开始对话'),undefined);assert.equal(elements(tree,'textarea').length,0);assert.deepEqual(sent,[]);}finally{runner.unmount();}
 });
+
+const motivationView = (complete = false) => {
+  const v = finaleView();
+  v.finale_speeches = v.characters.filter(c => c.id !== v.selected_character_id)
+    .map(c => ({ character_id: c.id, text: complete ? '我怀疑甲，公开纸条仍有疑点。' : '' }));
+  v.finale_motivation = { policy: 'finale-motivation/1.0', complete, pending: false, completed_count: complete ? 4 : 0 };
+  return v;
+};
+
+test('finale displays four prior views and actual votes, including offseat target and abstention', () => {
+  const v = motivationView(true); v.full_game.finale.all_sealed = true;
+  v.full_game.finale.votes.sealed_count = 5;
+  v.full_game.finale.vote_disclosure = v.characters.map((c, i) => ({ character_id: c.id,
+    voted_for: i === 1 ? 'visitor' : null, voted_for_label: i === 1 ? '虚构访客' : '弃权',
+    motivation: v.finale_speeches.find(s => s.character_id === c.id)?.text || '' }));
+  const { default: C, validFullGame } = compile('../src/components/FullGamePanel.tsx', panelImports());
+  assert.equal(validFullGame(v), true);
+  const html = renderToStaticMarkup(React.createElement(C, { view: v, locked: false, section: 'finale' }));
+  assert.match(html, /封卷前看法/); assert.match(html, /投票公示/);
+  assert.match(html, /投票给.*虚构访客.*—/); assert.match(html, /弃权/);
+});
+
+test('finale rejects premature votes and malformed AI seats', () => {
+  const { validFullGame } = compile('../src/components/FullGamePanel.tsx', panelImports());
+  for (const mutate of [v => v.finale_speeches[0].character_id = v.selected_character_id,
+    v => v.finale_speeches[0].text = '长'.repeat(61), v => v.finale_motivation.completed_count = 4,
+    v => v.full_game.finale.vote_disclosure = []]) {
+    const v = motivationView(); mutate(v); assert.equal(validFullGame(v), false);
+  }
+});
+
+test('automatic finale continuation posts once and completed refreshes are read only', async t => {
+  const ready = motivationView(), done = motivationView(true); done.revision = ready.revision + 8;
+  ready.finale_motivation.policy = done.finale_motivation.policy = 'finale-motivation/1.1';
+  const posts = []; let current = ready;
+  t.mock.method(global, 'fetch', async (url, options) => {
+    if (options.method === 'POST') { posts.push({ url, options }); current = done; }
+    return response(current);
+  });
+  const w = workspaceHarness();
+  try {
+    w.render(); await settleTick(); w.render(); await new Promise(r => setTimeout(r, 15));
+    let panel = w.render(); assert.equal(posts.length, 1); assert.equal(panel.view.finale_motivation.complete, true);
+    assert.match(posts[0].url, /\/finale-motivations$/); assert.equal(posts[0].options.body, undefined);
+    panel.onReload(); w.render(); await settleTick(); w.render(); await new Promise(r => setTimeout(r, 10));
+    assert.equal(posts.length, 1);
+  } finally { w.unmount(); }
+});
+
+test('malformed finale response cannot trigger automatic paid continuation', async t => {
+  const v = motivationView(); v.finale_speeches[0].character_id = v.selected_character_id;
+  const posts = [];
+  t.mock.method(global, 'fetch', async (url, options) => { if (options.method === 'POST') posts.push(url); return response(v); });
+  const w = workspaceHarness();
+  try { w.render(); await settleTick(); assert.equal(w.render().requiresRefresh, true);
+    await new Promise(r => setTimeout(r, 10)); assert.deepEqual(posts, []);
+  } finally { w.unmount(); }
+});
+
+test('automatic finale auth failure hides prior private view and does not retry', async t => {
+  const v = motivationView(); let posts = 0;
+  t.mock.method(global, 'fetch', async (_url, options) => {
+    if (options.method === 'POST') { posts++; return { ok: false, status: 403, json: async () => ({ detail: 'denied' }) }; }
+    return response(v);
+  });
+  const w = workspaceHarness();
+  try { w.render(); await settleTick(); w.render(); await new Promise(r => setTimeout(r, 15));
+    const panel = w.render(); assert.equal(panel.view, undefined); assert.equal(panel.requiresRefresh, true);
+    await new Promise(r => setTimeout(r, 10)); assert.equal(posts, 1);
+  } finally { w.unmount(); }
+});
